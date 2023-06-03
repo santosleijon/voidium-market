@@ -1,0 +1,53 @@
+@startuml
+
+left to right direction
+
+node com.github.santosleijon.common {
+  database EventStore
+}
+
+node com.github.santosleijon.saleorders {
+  entity SaleOrder
+  component SaleOrderController
+  component SaleOrderService
+  component SaleOrderRepository
+
+  SaleOrderController --> SaleOrderService
+  SaleOrderService --> SaleOrder
+  SaleOrderService --> SaleOrderRepository
+  SaleOrderRepository --> SaleOrder
+  SaleOrderRepository --> EventStore
+}
+
+node com.github.santosleijon.purchaseorders {
+  entity PurchaseOrder
+  component PurchaseOrderController
+  component PurchaseOrderService
+  component PurchaseOrderRepository
+
+  PurchaseOrderController --> PurchaseOrderService
+  PurchaseOrderService --> PurchaseOrderRepository
+  PurchaseOrderRepository --> PurchaseOrder
+  PurchaseOrderRepository --> EventStore
+}
+
+node com.github.santosleijon.purchases {
+  entity Purchase
+  component PurchaseController
+  component PurchaseRepository
+
+  PurchaseController --> PurchaseRepository
+  PurchaseRepository --> Purchase
+  PurchaseRepository --> EventStore
+}
+
+node com.github.santosleijon.broker {
+  component BrokerWorker
+  component BrokerService
+
+  BrokerWorker --> BrokerService
+  BrokerService --> PurchaseRepository
+  BrokerService --> Purchase
+}
+
+@enduml

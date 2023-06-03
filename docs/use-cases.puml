@@ -1,0 +1,39 @@
+@startuml
+
+title Use cases in "Voidium Market" v1
+
+actor Buyer
+actor Seller
+actor Broker
+
+node "Voidium Market" {
+  left to right direction
+  usecase "Place buy order" as UC1
+  usecase "View placed buy orders" as UC2
+
+  usecase "Place sell order" as UC3
+  usecase "View placed sell orders" as UC4
+
+  usecase "View completed purchases" as UC5
+
+  usecase "View account balance" as UC6
+  usecase "View voidium balance" as UC7
+
+  usecase "Complete orders" as UC8
+}
+
+Buyer --> UC1
+Buyer --> UC2
+Buyer --> UC4
+Buyer --> UC5
+Buyer --> UC6
+Buyer --> UC7
+Seller -u-> UC2
+Seller -u-> UC3
+Seller -u-> UC4
+Seller -u-> UC5
+Seller -u-> UC6
+Seller -u-> UC7
+Broker -l-> UC8
+
+@enduml
