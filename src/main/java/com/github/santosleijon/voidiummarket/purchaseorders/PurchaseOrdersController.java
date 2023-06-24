@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class PurchaseOrdersController {
@@ -17,7 +18,12 @@ public class PurchaseOrdersController {
     }
 
     @GetMapping("/purchase-orders")
-    List<PurchaseOrder> getAll() {
+    public List<PurchaseOrder> getAll() {
         return purchaseOrdersService.getAll();
+    }
+
+    @GetMapping("/purchase-orders/{id}")
+    public PurchaseOrder get(UUID id) {
+        return purchaseOrdersService.get(id);
     }
 }
