@@ -54,7 +54,7 @@ public class PurchaseOrdersRepository {
         return purchaseOrders;
     }
 
-    public void save(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSaved {
+    public void save(PurchaseOrder purchaseOrder) {
         for (var event : purchaseOrder.getPendingEvents()) {
             try {
                 eventStore.publish(event);

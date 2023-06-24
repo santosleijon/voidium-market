@@ -1,7 +1,6 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotDeleted;
-import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSaved;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,11 +27,11 @@ public class PurchaseOrdersService {
         return purchaseOrdersRepository.get(id);
     }
 
-    public void place(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSaved {
+    public void place(PurchaseOrder purchaseOrder) {
         purchaseOrdersRepository.save(purchaseOrder);
     }
 
-    public void delete(UUID id) throws PurchaseOrderNotDeleted {
+    public void delete(UUID id) {
         var purchaseOrder = purchaseOrdersRepository.get(id);
 
         if (purchaseOrder == null) {
