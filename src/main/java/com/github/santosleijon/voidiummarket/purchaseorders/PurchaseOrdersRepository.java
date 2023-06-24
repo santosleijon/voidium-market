@@ -29,7 +29,13 @@ public class PurchaseOrdersRepository {
             return null;
         }
 
-        return new PurchaseOrder(id, events);
+        var purchaseOrder = new PurchaseOrder(id, events);
+
+        if (purchaseOrder.deleted) {
+            return null;
+        }
+
+        return purchaseOrder;
     }
 
     public List<PurchaseOrder> getAll() {
@@ -39,7 +45,10 @@ public class PurchaseOrdersRepository {
 
         for (var purchaseOrderEntry : eventsByPurchaseOrderId.entrySet()) {
             var purchaseOrder = new PurchaseOrder(purchaseOrderEntry.getKey(), purchaseOrderEntry.getValue());
-            purchaseOrders.add(purchaseOrder);
+
+            if (!purchaseOrder.deleted) {
+                purchaseOrders.add(purchaseOrder);
+            }
         }
 
         return purchaseOrders;

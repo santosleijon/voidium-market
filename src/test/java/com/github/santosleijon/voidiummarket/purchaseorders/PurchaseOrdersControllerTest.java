@@ -16,7 +16,7 @@ import java.util.UUID;
 class PurchaseOrdersControllerTest {
 
     private final PurchaseOrdersService purchaseOrdersService;
-    private final PurchaseOrdersController purchaseOrderController;
+    private final PurchaseOrdersController purchaseOrdersController;
 
     private final PurchaseOrder examplePurchaseOrder = new PurchaseOrder(
             UUID.randomUUID(),
@@ -28,7 +28,7 @@ class PurchaseOrdersControllerTest {
     @Autowired
     PurchaseOrdersControllerTest(PurchaseOrdersService purchaseOrdersService) {
         this.purchaseOrdersService = purchaseOrdersService;
-        this.purchaseOrderController = new PurchaseOrdersController(purchaseOrdersService);
+        this.purchaseOrdersController = new PurchaseOrdersController(purchaseOrdersService);
     }
 
     // TODO: Replace controller method invocations with HTTP requests
@@ -37,7 +37,7 @@ class PurchaseOrdersControllerTest {
     void getAllShouldReturnAllPurchaseOrders() throws PurchaseOrderNotSavedException {
         purchaseOrdersService.add(examplePurchaseOrder);
 
-        var getPurchaseOrdersResult = purchaseOrderController.getAll();
+        var getPurchaseOrdersResult = purchaseOrdersController.getAll();
 
         Assertions.assertThat(getPurchaseOrdersResult).contains(examplePurchaseOrder);
     }
@@ -46,7 +46,7 @@ class PurchaseOrdersControllerTest {
     void getPurchaseOrderShouldReturnCorrectPurchaseOrder() throws PurchaseOrderNotSavedException {
         purchaseOrdersService.add(examplePurchaseOrder);
 
-        var getPurchaseOrderResult = purchaseOrderController.get(examplePurchaseOrder.id);
+        var getPurchaseOrderResult = purchaseOrdersController.get(examplePurchaseOrder.id);
 
         Assertions.assertThat(getPurchaseOrderResult).isEqualTo(examplePurchaseOrder);
     }
@@ -55,7 +55,21 @@ class PurchaseOrdersControllerTest {
     void getPurchaseOrderShouldReturnErrorWhenPurchaseOrderIsNotFound() {
         var notFoundPurchaseOrderId = UUID.randomUUID();
 
-        Assertions.assertThatThrownBy(() -> purchaseOrderController.get(notFoundPurchaseOrderId))
+        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(notFoundPurchaseOrderId))
                 .isInstanceOf(PurchaseOrderNotFound.class);
+    }
+
+    @Test
+    void deletePurchaseOrderShouldMakePurchaseOrderNotRetrievable() {
+        purchaseOrdersService.add(examplePurchaseOrder);
+
+        var deletePurchaseOrderId = examplePurchaseOrder.id;
+
+        purchaseOrdersController.delete(deletePurchaseOrderId);
+
+        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(deletePurchaseOrderId))
+                .isInstanceOf(PurchaseOrderNotFound.class);
+
+        Assertions.assertThat(purchaseOrdersController.getAll()).doesNotContain(examplePurchaseOrder);
     }
 }

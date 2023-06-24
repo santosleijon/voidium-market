@@ -3,6 +3,7 @@ package com.github.santosleijon.voidiummarket.purchaseorders;
 import com.github.santosleijon.voidiummarket.common.AggregateRoot;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.purchaseorders.events.PurchaseOrderPlaced;
+import com.github.santosleijon.voidiummarket.purchaseorders.events.PurchaseOrderDeleted;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,6 +19,7 @@ public class PurchaseOrder extends AggregateRoot {
     public int unitsCount;
     public BigDecimal pricePerUnit;
     public Currency currency;
+    public boolean deleted;
 
 
     public PurchaseOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Currency currency) {
@@ -32,6 +34,14 @@ public class PurchaseOrder extends AggregateRoot {
         events.forEach(this::mutate);
     }
 
+    public void delete() {
+        var eventId = UUID.randomUUID();
+        var removedDate = Instant.now();
+
+        var event = new PurchaseOrderDeleted(eventId, removedDate, id);
+        this.apply(event);
+    }
+
     @Override
     public void mutate(DomainEvent event) {
         if (event instanceof PurchaseOrderPlaced purchaseOrderPlaced) {
@@ -39,6 +49,9 @@ public class PurchaseOrder extends AggregateRoot {
             this.unitsCount = purchaseOrderPlaced.getUnitsCount();
             this.pricePerUnit = purchaseOrderPlaced.getPricePerUnit();
             this.currency = purchaseOrderPlaced.getCurrency();
+            this.deleted = false;
+        } else if (event instanceof PurchaseOrderDeleted) {
+            this.deleted = true;
         } else {
             throw new IllegalStateException("Unexpected event: " + event);
         }
@@ -49,14 +62,11 @@ public class PurchaseOrder extends AggregateRoot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PurchaseOrder that = (PurchaseOrder) o;
-        return id == that.id &&
-                unitsCount == that.unitsCount &&
-                pricePerUnit.equals(that.pricePerUnit) &&
-                currency.equals(that.currency);
+        return unitsCount == that.unitsCount && deleted == that.deleted && pricePerUnit.equals(that.pricePerUnit) && currency.equals(that.currency);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, unitsCount, pricePerUnit, currency);
+        return Objects.hash(unitsCount, pricePerUnit, currency, deleted);
     }
 }

@@ -40,6 +40,6 @@ public class EventStore {
     public Map<UUID, List<DomainEvent>> getEventsByAggregateName(String aggregateName) {
         return events.stream()
                 .filter(e -> e.getAggregateName().equals(aggregateName))
-                .collect(groupingBy(DomainEvent::getId));
+                .collect(groupingBy(DomainEvent::getAggregateId));
     }
 }
