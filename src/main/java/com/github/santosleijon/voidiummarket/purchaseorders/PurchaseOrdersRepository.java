@@ -54,7 +54,4 @@ public class PurchaseOrdersRepository {
             }
         }
     }
-
-    // TODO: update(PurchaseOrder purchaseOrder)
-    // TODO: remove(UUID purchaseOrderId)
 }
