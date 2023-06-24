@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSavedException;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ public class PurchaseOrdersService {
         return purchaseOrdersRepository.getAll();
     }
 
+    @Nullable
     public PurchaseOrder get(UUID id) {
         return purchaseOrdersRepository.get(id);
     }

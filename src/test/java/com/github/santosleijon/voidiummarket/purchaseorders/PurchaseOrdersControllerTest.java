@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
+import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSavedException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -48,5 +49,13 @@ class PurchaseOrdersControllerTest {
         var getPurchaseOrderResult = purchaseOrderController.get(examplePurchaseOrder.id);
 
         Assertions.assertThat(getPurchaseOrderResult).isEqualTo(examplePurchaseOrder);
+    }
+
+    @Test
+    void getPurchaseOrderShouldReturnErrorWhenPurchaseOrderIsNotFound() {
+        var notFoundPurchaseOrderId = UUID.randomUUID();
+
+        Assertions.assertThatThrownBy(() -> purchaseOrderController.get(notFoundPurchaseOrderId))
+                .isInstanceOf(PurchaseOrderNotFound.class);
     }
 }
