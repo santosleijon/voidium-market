@@ -1,11 +1,13 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
+
+@Component
 public class EventStore {
 
     // TODO: How to ensure that events are ordered correctly by date?
@@ -14,7 +16,7 @@ public class EventStore {
 
     public void publish(DomainEvent event) throws DomainEventAlreadyPublished {
         var existingEventWithSameID = events.stream()
-                .filter(e -> e.id() == event.id())
+                .filter(e -> e.getId() == event.getId())
                 .findFirst()
                 .orElse(null);
 
@@ -29,9 +31,15 @@ public class EventStore {
         return Collections.unmodifiableList((events));
     }
 
-    public List<DomainEvent> getEventsForAggregate(UUID aggregateId) {
+    public List<DomainEvent> getEventsByAggregateId(UUID aggregateId) {
         return events.stream()
-                .filter(e -> e.aggregateId() == aggregateId)
+                .filter(e -> e.getAggregateId() == aggregateId)
                 .collect(Collectors.toList());
+    }
+
+    public Map<UUID, List<DomainEvent>> getEventsByAggregateName(String aggregateName) {
+        return events.stream()
+                .filter(e -> e.getAggregateName().equals(aggregateName))
+                .collect(groupingBy(DomainEvent::getId));
     }
 }
