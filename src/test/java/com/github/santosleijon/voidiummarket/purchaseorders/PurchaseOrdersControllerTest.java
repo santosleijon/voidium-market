@@ -35,7 +35,7 @@ class PurchaseOrdersControllerTest {
 
     @Test
     void getAllShouldReturnAllPurchaseOrders() throws PurchaseOrderNotSavedException {
-        purchaseOrdersService.add(examplePurchaseOrder);
+        purchaseOrdersService.place(examplePurchaseOrder);
 
         var getPurchaseOrdersResult = purchaseOrdersController.getAll();
 
@@ -44,7 +44,7 @@ class PurchaseOrdersControllerTest {
 
     @Test
     void getPurchaseOrderShouldReturnCorrectPurchaseOrder() throws PurchaseOrderNotSavedException {
-        purchaseOrdersService.add(examplePurchaseOrder);
+        purchaseOrdersService.place(examplePurchaseOrder);
 
         var getPurchaseOrderResult = purchaseOrdersController.get(examplePurchaseOrder.id);
 
@@ -61,7 +61,7 @@ class PurchaseOrdersControllerTest {
 
     @Test
     void deletePurchaseOrderShouldMakePurchaseOrderNotRetrievable() {
-        purchaseOrdersService.add(examplePurchaseOrder);
+        purchaseOrdersService.place(examplePurchaseOrder);
 
         var deletePurchaseOrderId = examplePurchaseOrder.id;
 
@@ -71,5 +71,14 @@ class PurchaseOrdersControllerTest {
                 .isInstanceOf(PurchaseOrderNotFound.class);
 
         Assertions.assertThat(purchaseOrdersController.getAll()).doesNotContain(examplePurchaseOrder);
+    }
+
+    @Test
+    void placePurchaseOrderShouldCreateNewPurchaseOrder() {
+        purchaseOrdersController.place(examplePurchaseOrder);
+
+        var getPlacedPurchaseOrderResult = purchaseOrdersController.get(examplePurchaseOrder.id);
+
+        Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(examplePurchaseOrder);
     }
 }

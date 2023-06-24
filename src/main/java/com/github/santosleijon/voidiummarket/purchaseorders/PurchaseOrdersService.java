@@ -28,7 +28,7 @@ public class PurchaseOrdersService {
         return purchaseOrdersRepository.get(id);
     }
 
-    public void add(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSavedException {
+    public void place(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSavedException {
         purchaseOrdersRepository.save(purchaseOrder);
     }
 

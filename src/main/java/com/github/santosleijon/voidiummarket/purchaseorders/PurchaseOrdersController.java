@@ -2,9 +2,7 @@ package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +33,10 @@ public class PurchaseOrdersController {
         return purchaseOrdersService.get(id);
     }
 
-    // TODO: place(PlacePurchaseOrderInput placePurchaseOrderInput)
+    @PostMapping("/purchase-orders")
+    public void place(@RequestBody PurchaseOrder purchaseOrder) {
+        purchaseOrdersService.place(purchaseOrder);
+    }
 
     @DeleteMapping("/purchase-orders/{id}")
     public void delete(UUID id) {
