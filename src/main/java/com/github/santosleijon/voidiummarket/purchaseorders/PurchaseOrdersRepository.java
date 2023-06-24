@@ -2,7 +2,7 @@ package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEventAlreadyPublished;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
-import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSavedException;
+import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSaved;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -54,12 +54,12 @@ public class PurchaseOrdersRepository {
         return purchaseOrders;
     }
 
-    public void save(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSavedException {
+    public void save(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSaved {
         for (var event : purchaseOrder.getPendingEvents()) {
             try {
                 eventStore.publish(event);
             } catch (DomainEventAlreadyPublished e) {
-                throw new PurchaseOrderNotSavedException(purchaseOrder.id, e);
+                throw new PurchaseOrderNotSaved(purchaseOrder.id, e);
             }
         }
     }

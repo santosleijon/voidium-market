@@ -1,7 +1,7 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
-import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotDeletedException;
-import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSavedException;
+import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotDeleted;
+import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSaved;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,11 +28,11 @@ public class PurchaseOrdersService {
         return purchaseOrdersRepository.get(id);
     }
 
-    public void place(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSavedException {
+    public void place(PurchaseOrder purchaseOrder) throws PurchaseOrderNotSaved {
         purchaseOrdersRepository.save(purchaseOrder);
     }
 
-    public void delete(UUID id) throws PurchaseOrderNotDeletedException {
+    public void delete(UUID id) throws PurchaseOrderNotDeleted {
         var purchaseOrder = purchaseOrdersRepository.get(id);
 
         if (purchaseOrder == null) {
@@ -43,7 +43,7 @@ public class PurchaseOrdersService {
             purchaseOrder.delete();
             purchaseOrdersRepository.save(purchaseOrder);
         } catch (Exception e) {
-            throw new PurchaseOrderNotDeletedException(id, e);
+            throw new PurchaseOrderNotDeleted(id, e);
         }
     }
 }

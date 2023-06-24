@@ -1,7 +1,7 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
-import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSavedException;
+import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSaved;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ class PurchaseOrdersControllerTest {
     // TODO: Replace controller method invocations with HTTP requests
 
     @Test
-    void getAllShouldReturnAllPurchaseOrders() throws PurchaseOrderNotSavedException {
+    void getAllShouldReturnAllPurchaseOrders() throws PurchaseOrderNotSaved {
         purchaseOrdersService.place(examplePurchaseOrder);
 
         var getPurchaseOrdersResult = purchaseOrdersController.getAll();
@@ -43,7 +43,7 @@ class PurchaseOrdersControllerTest {
     }
 
     @Test
-    void getPurchaseOrderShouldReturnCorrectPurchaseOrder() throws PurchaseOrderNotSavedException {
+    void getPurchaseOrderShouldReturnCorrectPurchaseOrder() throws PurchaseOrderNotSaved {
         purchaseOrdersService.place(examplePurchaseOrder);
 
         var getPurchaseOrderResult = purchaseOrdersController.get(examplePurchaseOrder.id);
