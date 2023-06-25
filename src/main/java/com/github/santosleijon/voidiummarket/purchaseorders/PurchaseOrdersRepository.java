@@ -23,7 +23,7 @@ public class PurchaseOrdersRepository {
 
     @Nullable
     public PurchaseOrder get(UUID id) {
-        var events = eventStore.getEventsByAggregateId(id);
+        var events = eventStore.getEventsByAggregateIdAndName(id, PurchaseOrder.aggregateName);
 
         if (events.size() < 1) {
             return null;
@@ -36,6 +36,12 @@ public class PurchaseOrdersRepository {
         }
 
         return purchaseOrder;
+    }
+
+    public boolean exists(UUID id) {
+        var events = eventStore.getEventsByAggregateIdAndName(id, PurchaseOrder.aggregateName);
+
+        return events.size() > 0;
     }
 
     public List<PurchaseOrder> getAll() {

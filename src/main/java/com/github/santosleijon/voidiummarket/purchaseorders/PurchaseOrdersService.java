@@ -28,6 +28,10 @@ public class PurchaseOrdersService {
     }
 
     public void place(PurchaseOrder purchaseOrder) {
+        if (purchaseOrdersRepository.exists(purchaseOrder.id)) {
+            return;
+        }
+
         purchaseOrdersRepository.save(purchaseOrder);
     }
 

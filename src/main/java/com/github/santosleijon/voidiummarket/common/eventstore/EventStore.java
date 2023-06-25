@@ -31,9 +31,9 @@ public class EventStore {
         return Collections.unmodifiableList((events));
     }
 
-    public List<DomainEvent> getEventsByAggregateId(UUID aggregateId) {
+    public List<DomainEvent> getEventsByAggregateIdAndName(UUID aggregateId, String aggregateName) {
         return events.stream()
-                .filter(e -> e.getAggregateId() == aggregateId)
+                .filter(e -> e.getAggregateId() == aggregateId && e.getAggregateName().equals(aggregateName))
                 .collect(Collectors.toList());
     }
 

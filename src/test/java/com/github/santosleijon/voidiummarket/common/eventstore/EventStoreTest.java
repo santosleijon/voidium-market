@@ -50,7 +50,7 @@ class EventStoreTest {
         eventStore.publish(secondAggregateEvent);
 
         var expectedList = List.of(firstAggregateEvent1, firstAggregateEvent2);
-        Assertions.assertThat(eventStore.getEventsByAggregateId(firstAggregateId)).isEqualTo(expectedList);
+        Assertions.assertThat(eventStore.getEventsByAggregateIdAndName(firstAggregateId, aggregateName)).isEqualTo(expectedList);
     }
 
     @Test
