@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.santosleijon.voidiummarket.common.AggregateRoot;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.UnexpectedDomainEvent;
@@ -20,9 +21,10 @@ public class PurchaseOrder extends AggregateRoot {
     public int unitsCount;
     public BigDecimal pricePerUnit;
     public Currency currency;
+    public Instant placedDate;
     public boolean deleted;
 
-
+    @JsonCreator
     public PurchaseOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Currency currency) {
         super(aggregateName, id);
 
@@ -43,6 +45,15 @@ public class PurchaseOrder extends AggregateRoot {
         this.apply(event);
     }
 
+    public PurchaseOrderDTO toDTO() {
+        return new PurchaseOrderDTO(
+                id,
+                unitsCount,
+                pricePerUnit,
+                currency,
+                deleted);
+    }
+
     @Override
     public void mutate(DomainEvent event) {
         if (event instanceof PurchaseOrderPlaced purchaseOrderPlaced) {
@@ -50,6 +61,7 @@ public class PurchaseOrder extends AggregateRoot {
             this.unitsCount = purchaseOrderPlaced.getUnitsCount();
             this.pricePerUnit = purchaseOrderPlaced.getPricePerUnit();
             this.currency = purchaseOrderPlaced.getCurrency();
+            this.placedDate = purchaseOrderPlaced.getDate();
             this.deleted = false;
         } else if (event instanceof PurchaseOrderDeleted) {
             this.deleted = true;
@@ -63,7 +75,7 @@ public class PurchaseOrder extends AggregateRoot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PurchaseOrder that = (PurchaseOrder) o;
-        return id == that.id && unitsCount == that.unitsCount && deleted == that.deleted && pricePerUnit.equals(that.pricePerUnit) && currency.equals(that.currency);
+        return id.equals(that.id) && unitsCount == that.unitsCount && deleted == that.deleted && pricePerUnit.equals(that.pricePerUnit) && currency.equals(that.currency);
     }
 
     @Override

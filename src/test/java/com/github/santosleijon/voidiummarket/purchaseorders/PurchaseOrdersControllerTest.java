@@ -1,84 +1,101 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
+import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
-import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotSaved;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Currency;
+import java.util.List;
 import java.util.UUID;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@TestPropertySource("classpath:test-application.properties")
 class PurchaseOrdersControllerTest {
 
     private final PurchaseOrdersService purchaseOrdersService;
     private final PurchaseOrdersController purchaseOrdersController;
-
-    private final PurchaseOrder examplePurchaseOrder = new PurchaseOrder(
-            UUID.randomUUID(),
-            Instant.now(),
-            1,
-            BigDecimal.ONE,
-            Currency.getInstance("SEK"));
+    private final TestHttpClient testHttpClient;
 
     @Autowired
-    PurchaseOrdersControllerTest(PurchaseOrdersService purchaseOrdersService) {
+    PurchaseOrdersControllerTest(PurchaseOrdersService purchaseOrdersService, PurchaseOrdersController purchaseOrdersController, TestHttpClient testHttpClient) {
         this.purchaseOrdersService = purchaseOrdersService;
-        this.purchaseOrdersController = new PurchaseOrdersController(purchaseOrdersService);
-    }
-
-    // TODO: Replace controller method invocations with HTTP requests
-
-    @Test
-    void getAllShouldReturnAllPurchaseOrders() throws PurchaseOrderNotSaved {
-        purchaseOrdersService.place(examplePurchaseOrder);
-
-        var getPurchaseOrdersResult = purchaseOrdersController.getAll();
-
-        Assertions.assertThat(getPurchaseOrdersResult).contains(examplePurchaseOrder);
+        this.purchaseOrdersController = purchaseOrdersController;
+        this.testHttpClient = testHttpClient;
     }
 
     @Test
-    void getPurchaseOrderShouldReturnCorrectPurchaseOrder() throws PurchaseOrderNotSaved {
-        purchaseOrdersService.place(examplePurchaseOrder);
+    void getAllShouldReturnAllPurchaseOrders() {
+        var testPurchaseOrder = createTestPurchaseOrder();
 
-        var getPurchaseOrderResult = purchaseOrdersController.get(examplePurchaseOrder.id);
+        purchaseOrdersService.place(testPurchaseOrder);
 
-        Assertions.assertThat(getPurchaseOrderResult).isEqualTo(examplePurchaseOrder);
+        var getPurchaseOrdersResult = testHttpClient.get("/purchase-orders", new TypeReference<List<PurchaseOrderDTO>>() { });
+
+        Assertions.assertThat(getPurchaseOrdersResult).contains(testPurchaseOrder.toDTO());
+    }
+
+    @Test
+    void getPurchaseOrderShouldReturnCorrectPurchaseOrder() {
+        var testPurchaseOrder = createTestPurchaseOrder();
+
+        purchaseOrdersService.place(testPurchaseOrder);
+
+        var getPurchaseOrderResult = testHttpClient.get("/purchase-orders/" + testPurchaseOrder.id, new TypeReference<PurchaseOrderDTO>() { });
+
+        Assertions.assertThat(getPurchaseOrderResult).isEqualTo(testPurchaseOrder.toDTO());
     }
 
     @Test
     void getPurchaseOrderShouldReturnErrorWhenPurchaseOrderIsNotFound() {
         var notFoundPurchaseOrderId = UUID.randomUUID();
 
-        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(notFoundPurchaseOrderId))
-                .isInstanceOf(PurchaseOrderNotFound.class);
-    }
-
-    @Test
-    void deletePurchaseOrderShouldMakePurchaseOrderNotRetrievable() {
-        purchaseOrdersService.place(examplePurchaseOrder);
-
-        var deletePurchaseOrderId = examplePurchaseOrder.id;
-
-        purchaseOrdersController.delete(deletePurchaseOrderId);
-
-        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(deletePurchaseOrderId))
-                .isInstanceOf(PurchaseOrderNotFound.class);
-
-        Assertions.assertThat(purchaseOrdersController.getAll()).doesNotContain(examplePurchaseOrder);
+        try {
+            testHttpClient.get("/purchase-orders/" + notFoundPurchaseOrderId, null);
+        } catch (HttpErrorResponse httpErrorResponse) {
+            Assertions.assertThat(httpErrorResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND.value());
+        }
     }
 
     @Test
     void placePurchaseOrderShouldCreateNewPurchaseOrder() {
-        purchaseOrdersController.place(examplePurchaseOrder);
+        var testPurchaseOrder = createTestPurchaseOrder();
 
-        var getPlacedPurchaseOrderResult = purchaseOrdersController.get(examplePurchaseOrder.id);
+        testHttpClient.post("/purchase-orders", testPurchaseOrder);
 
-        Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(examplePurchaseOrder);
+        var getPlacedPurchaseOrderResult = purchaseOrdersController.get(testPurchaseOrder.id);
+
+        Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(testPurchaseOrder.toDTO());
+    }
+
+    @Test
+    void deletePurchaseOrderShouldMakePurchaseOrderNotRetrievable() {
+        var testPurchaseOrder = createTestPurchaseOrder();
+
+        purchaseOrdersService.place(testPurchaseOrder);
+
+        testHttpClient.delete("/purchase-orders/" + testPurchaseOrder.id);
+
+        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(testPurchaseOrder.id))
+                .isInstanceOf(PurchaseOrderNotFound.class);
+
+        Assertions.assertThat(purchaseOrdersController.getAll()).doesNotContain(testPurchaseOrder.toDTO());
+    }
+
+    private PurchaseOrder createTestPurchaseOrder() {
+        return new PurchaseOrder(
+                UUID.randomUUID(),
+                Instant.now(),
+                1,
+                BigDecimal.ONE,
+                Currency.getInstance("SEK"));
     }
 }

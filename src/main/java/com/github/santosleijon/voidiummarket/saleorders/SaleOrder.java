@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.santosleijon.voidiummarket.common.AggregateRoot;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.UnexpectedDomainEvent;
@@ -20,8 +21,10 @@ public class SaleOrder extends AggregateRoot {
     public int unitsCount;
     public BigDecimal pricePerUnit;
     public Currency currency;
+    public Instant placedDate;
     public boolean deleted;
 
+    @JsonCreator
     public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Currency currency) {
         super(aggregateName, id);
 
@@ -49,6 +52,7 @@ public class SaleOrder extends AggregateRoot {
             this.unitsCount = saleOrderPlaced.getUnitsCount();
             this.pricePerUnit = saleOrderPlaced.getPricePerUnit();
             this.currency = saleOrderPlaced.getCurrency();
+            this.placedDate = saleOrderPlaced.getDate();
             this.deleted = false;
         } else if (event instanceof SaleOrderDeleted) {
             this.deleted = true;
@@ -57,12 +61,22 @@ public class SaleOrder extends AggregateRoot {
         }
     }
 
+    public SaleOrderDTO toDTO() {
+        return new SaleOrderDTO(
+                this.id,
+                this.unitsCount,
+                this.pricePerUnit,
+                this.currency,
+                this.deleted
+        );
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SaleOrder saleOrder = (SaleOrder) o;
-        return id == saleOrder.id && unitsCount == saleOrder.unitsCount && deleted == saleOrder.deleted && pricePerUnit.equals(saleOrder.pricePerUnit) && currency.equals(saleOrder.currency);
+        return id.equals(saleOrder.id) && unitsCount == saleOrder.unitsCount && deleted == saleOrder.deleted && pricePerUnit.equals(saleOrder.pricePerUnit) && currency.equals(saleOrder.currency);
     }
 
     @Override

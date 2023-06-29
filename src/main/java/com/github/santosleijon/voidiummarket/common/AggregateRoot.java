@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 
 import java.util.ArrayList;
@@ -7,8 +8,12 @@ import java.util.List;
 import java.util.UUID;
 
 public abstract class AggregateRoot {
+
     public String name;
+
     public UUID id;
+
+    @JsonIgnore
     private final List<DomainEvent> pendingEvents = new ArrayList<>();
 
     public AggregateRoot(String name, UUID id) {

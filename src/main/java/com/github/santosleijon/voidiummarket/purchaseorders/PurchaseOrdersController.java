@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 public class PurchaseOrdersController {
@@ -18,19 +19,21 @@ public class PurchaseOrdersController {
     }
 
     @GetMapping("/purchase-orders")
-    public List<PurchaseOrder> getAll() {
-        return purchaseOrdersService.getAll();
+    public List<PurchaseOrderDTO> getAll() {
+        return purchaseOrdersService.getAll().stream()
+                .map(PurchaseOrder::toDTO)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/purchase-orders/{id}")
-    public PurchaseOrder get(UUID id) {
+    public PurchaseOrderDTO get(@PathVariable UUID id) {
         var purchaseOrder = purchaseOrdersService.get(id);
 
         if (purchaseOrder == null) {
             throw new PurchaseOrderNotFound();
         }
 
-        return purchaseOrdersService.get(id);
+        return purchaseOrdersService.get(id).toDTO();
     }
 
     @PostMapping("/purchase-orders")
@@ -39,7 +42,7 @@ public class PurchaseOrdersController {
     }
 
     @DeleteMapping("/purchase-orders/{id}")
-    public void delete(UUID id) {
+    public void delete(@PathVariable UUID id) {
         purchaseOrdersService.delete(id);
     }
 }
