@@ -53,7 +53,7 @@ class SaleOrdersControllerTest {
         saleOrdersService.place(testSaleOrder1);
         saleOrdersService.place(testSaleOrder2);
 
-        var getResult = testHttpClient.get("/sale-orders/" + testSaleOrder2.id, new TypeReference<SaleOrderDTO>() { });
+        var getResult = testHttpClient.get("/sale-orders/" + testSaleOrder2.getId(), new TypeReference<SaleOrderDTO>() { });
 
         Assertions.assertThat(getResult).isEqualTo(testSaleOrder2.toDTO());
     }
@@ -75,7 +75,7 @@ class SaleOrdersControllerTest {
 
         testHttpClient.post("/sale-orders", testSaleOrder);
 
-        var getPlacedSaleOrderResult = saleOrdersController.get(testSaleOrder.id);
+        var getPlacedSaleOrderResult = saleOrdersController.get(testSaleOrder.getId());
 
         Assertions.assertThat(getPlacedSaleOrderResult).isEqualTo(testSaleOrder.toDTO());
     }
@@ -86,7 +86,7 @@ class SaleOrdersControllerTest {
 
         saleOrdersService.place(testSaleOrder);
 
-        var deleteSaleOrderId = testSaleOrder.id;
+        var deleteSaleOrderId = testSaleOrder.getId();
 
         saleOrdersController.delete(deleteSaleOrderId);
 

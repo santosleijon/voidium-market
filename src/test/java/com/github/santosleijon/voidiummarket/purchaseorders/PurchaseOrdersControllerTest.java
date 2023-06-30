@@ -49,7 +49,7 @@ class PurchaseOrdersControllerTest {
 
         purchaseOrdersService.place(testPurchaseOrder);
 
-        var getPurchaseOrderResult = testHttpClient.get("/purchase-orders/" + testPurchaseOrder.id, new TypeReference<PurchaseOrderDTO>() { });
+        var getPurchaseOrderResult = testHttpClient.get("/purchase-orders/" + testPurchaseOrder.getId(), new TypeReference<PurchaseOrderDTO>() { });
 
         Assertions.assertThat(getPurchaseOrderResult).isEqualTo(testPurchaseOrder.toDTO());
     }
@@ -71,7 +71,7 @@ class PurchaseOrdersControllerTest {
 
         testHttpClient.post("/purchase-orders", testPurchaseOrder);
 
-        var getPlacedPurchaseOrderResult = purchaseOrdersController.get(testPurchaseOrder.id);
+        var getPlacedPurchaseOrderResult = purchaseOrdersController.get(testPurchaseOrder.getId());
 
         Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(testPurchaseOrder.toDTO());
     }
@@ -82,9 +82,9 @@ class PurchaseOrdersControllerTest {
 
         purchaseOrdersService.place(testPurchaseOrder);
 
-        testHttpClient.delete("/purchase-orders/" + testPurchaseOrder.id);
+        testHttpClient.delete("/purchase-orders/" + testPurchaseOrder.getId());
 
-        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(testPurchaseOrder.id))
+        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(testPurchaseOrder.getId()))
                 .isInstanceOf(PurchaseOrderNotFound.class);
 
         Assertions.assertThat(purchaseOrdersController.getAll()).doesNotContain(testPurchaseOrder.toDTO());

@@ -8,6 +8,7 @@ import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderDeleted;
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderPlaced;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Currency;
 import java.util.List;
@@ -18,23 +19,43 @@ public class SaleOrder extends AggregateRoot {
 
     public final static String aggregateName = "SaleOrder";
 
-    public int unitsCount;
-    public BigDecimal pricePerUnit;
-    public Currency currency;
-    public Instant placedDate;
-    public boolean deleted;
+    private int unitsCount;
+    private BigDecimal pricePerUnit;
+    private Currency currency;
+    private Instant placedDate;
+    private boolean deleted;
 
     @JsonCreator
     public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Currency currency) {
         super(aggregateName, id);
 
-        var initEvent = new SaleOrderPlaced(id, placedDate, id, unitsCount, pricePerUnit, currency);
+        var initEvent = new SaleOrderPlaced(id, placedDate, id, unitsCount, pricePerUnit.setScale(2, RoundingMode.HALF_UP), currency);
         this.apply(initEvent);
     }
 
     public SaleOrder(UUID id, List<DomainEvent> events) {
         super(aggregateName, id);
         events.forEach(this::mutate);
+    }
+
+    public int getUnitsCount() {
+        return unitsCount;
+    }
+
+    public BigDecimal getPricePerUnit() {
+        return pricePerUnit;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public Instant getPlacedDate() {
+        return placedDate;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 
     public void delete() {

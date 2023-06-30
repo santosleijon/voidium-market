@@ -31,7 +31,7 @@ public class PurchaseOrdersRepository {
 
         var purchaseOrder = new PurchaseOrder(id, events);
 
-        if (purchaseOrder.deleted) {
+        if (purchaseOrder.isDeleted()) {
             return null;
         }
 
@@ -52,7 +52,7 @@ public class PurchaseOrdersRepository {
         for (var purchaseOrderEntry : eventsByPurchaseOrderId.entrySet()) {
             var purchaseOrder = new PurchaseOrder(purchaseOrderEntry.getKey(), purchaseOrderEntry.getValue());
 
-            if (!purchaseOrder.deleted) {
+            if (!purchaseOrder.isDeleted()) {
                 purchaseOrders.add(purchaseOrder);
             }
         }
@@ -65,7 +65,7 @@ public class PurchaseOrdersRepository {
             try {
                 eventStore.publish(event);
             } catch (DomainEventAlreadyPublished e) {
-                throw new PurchaseOrderNotSaved(purchaseOrder.id, e);
+                throw new PurchaseOrderNotSaved(purchaseOrder.getId(), e);
             }
         }
     }

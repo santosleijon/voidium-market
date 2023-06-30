@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public abstract class AggregateRoot {
 
-    public String name;
+    protected final String name;
 
-    public UUID id;
+    protected UUID id;
 
     @JsonIgnore
     private final List<DomainEvent> pendingEvents = new ArrayList<>();
@@ -19,6 +19,14 @@ public abstract class AggregateRoot {
     public AggregateRoot(String name, UUID id) {
         this.name = name;
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public void apply(DomainEvent event) {

@@ -31,7 +31,7 @@ public class SaleOrdersRepository {
 
         var saleOrder = new SaleOrder(id, events);
 
-        if (saleOrder.deleted) {
+        if (saleOrder.isDeleted()) {
             return null;
         }
 
@@ -52,7 +52,7 @@ public class SaleOrdersRepository {
         for (var saleOrderEntry : eventsBySaleOrderId.entrySet()) {
             var saleOrder = new SaleOrder(saleOrderEntry.getKey(), saleOrderEntry.getValue());
 
-            if (!saleOrder.deleted) {
+            if (!saleOrder.isDeleted()) {
                 saleOrders.add(saleOrder);
             }
         }
@@ -65,7 +65,7 @@ public class SaleOrdersRepository {
             try {
                 eventStore.publish(event);
             } catch (DomainEventAlreadyPublished e) {
-                throw new SaleOrderNotSaved(saleOrder.id, e);
+                throw new SaleOrderNotSaved(saleOrder.getId(), e);
             }
         }
     }

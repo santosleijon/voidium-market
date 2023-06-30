@@ -28,7 +28,7 @@ public class SaleOrdersService {
     }
 
     public void place(SaleOrder saleOrder) {
-        if (saleOrdersRepository.exists(saleOrder.id)) {
+        if (saleOrdersRepository.exists(saleOrder.getId())) {
             return;
         }
 

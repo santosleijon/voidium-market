@@ -28,7 +28,7 @@ public class PurchaseOrdersService {
     }
 
     public void place(PurchaseOrder purchaseOrder) {
-        if (purchaseOrdersRepository.exists(purchaseOrder.id)) {
+        if (purchaseOrdersRepository.exists(purchaseOrder.getId())) {
             return;
         }
 
