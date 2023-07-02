@@ -2,6 +2,8 @@ package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotDeleted;
 import jakarta.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,8 @@ import java.util.UUID;
 public class PurchaseOrdersService {
 
     private final PurchaseOrdersRepository purchaseOrdersRepository;
+
+    private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersService.class);
 
     @Autowired
     public PurchaseOrdersService(PurchaseOrdersRepository purchaseOrdersRepository) {
@@ -33,6 +37,8 @@ public class PurchaseOrdersService {
         }
 
         purchaseOrdersRepository.save(purchaseOrder);
+
+        log.info("PurchaseOrder {}: Buy {} units to unit price of {} {}", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit(), purchaseOrder.getCurrency().getCurrencyCode());
     }
 
     public void delete(UUID id) {
@@ -48,5 +54,7 @@ public class PurchaseOrdersService {
         } catch (Exception e) {
             throw new PurchaseOrderNotDeleted(id, e);
         }
+
+        log.info("PurchaseOrder {}: Delete order of {} units to unit price of {} {}", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit(), purchaseOrder.getCurrency().getCurrencyCode());
     }
 }

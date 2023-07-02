@@ -10,21 +10,17 @@ import java.util.Currency;
 @ConfigurationPropertiesScan
 public class SimulatorConfig {
 
-    private int sellerExecutionIntervalSeconds = 2;
     private int sellerMinUnitsCount = 1;
-    private int sellerMaxUnitsCount = 5;
+    private int sellerMaxUnitsCount = 4;
     private BigDecimal sellerMinPricePerUnit = BigDecimal.valueOf(10.00);
     private BigDecimal sellerMaxPricePerUnit = BigDecimal.valueOf(20.00);
 
+    private int buyerMinUnitsCount = 1;
+    private int buyerMaxUnitsCount = 4;
+    private BigDecimal buyerMinPricePerUnit = BigDecimal.valueOf(5.00);
+    private BigDecimal buyerMaxPricePerUnit = BigDecimal.valueOf(15.00);
+
     private Currency currency = Currency.getInstance("SEK");
-
-    public int getSellerExecutionIntervalSeconds() {
-        return sellerExecutionIntervalSeconds;
-    }
-
-    public void setSellerExecutionIntervalSeconds(int sellerExecutionIntervalSeconds) {
-        this.sellerExecutionIntervalSeconds = sellerExecutionIntervalSeconds;
-    }
 
     public int getSellerMinUnitsCount() {
         return sellerMinUnitsCount;
@@ -56,6 +52,38 @@ public class SimulatorConfig {
 
     public void setSellerMaxPricePerUnit(BigDecimal sellerMaxPricePerUnit) {
         this.sellerMaxPricePerUnit = sellerMaxPricePerUnit;
+    }
+
+    public int getBuyerMinUnitsCount() {
+        return buyerMinUnitsCount;
+    }
+
+    public void setBuyerMinUnitsCount(int buyerMinUnitsCount) {
+        this.buyerMinUnitsCount = buyerMinUnitsCount;
+    }
+
+    public int getBuyerMaxUnitsCount() {
+        return buyerMaxUnitsCount;
+    }
+
+    public void setBuyerMaxUnitsCount(int buyerMaxUnitsCount) {
+        this.buyerMaxUnitsCount = buyerMaxUnitsCount;
+    }
+
+    public BigDecimal getBuyerMinPricePerUnit() {
+        return buyerMinPricePerUnit;
+    }
+
+    public void setBuyerMinPricePerUnit(BigDecimal buyerMinPricePerUnit) {
+        this.buyerMinPricePerUnit = buyerMinPricePerUnit;
+    }
+
+    public BigDecimal getBuyerMaxPricePerUnit() {
+        return buyerMaxPricePerUnit;
+    }
+
+    public void setBuyerMaxPricePerUnit(BigDecimal buyerMaxPricePerUnit) {
+        this.buyerMaxPricePerUnit = buyerMaxPricePerUnit;
     }
 
     public Currency getCurrency() {
