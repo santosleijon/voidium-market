@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
+import com.github.santosleijon.voidiummarket.common.eventstore.errors.DomainEventAlreadyPublished;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ class EventStoreTest {
     }
 
     @Test
-    void getEventsReturnsEvents() throws DomainEventAlreadyPublished {
+    void getEventsReturnsEvents() {
         var eventStore = new EventStore();
 
         var aggregateName = "aggregateName";
@@ -34,7 +35,7 @@ class EventStoreTest {
     }
 
     @Test
-    void getEventsForAggregateReturnsRelevantEventsOnly() throws DomainEventAlreadyPublished {
+    void getEventsForAggregateReturnsRelevantEventsOnly() {
         var eventStore = new EventStore();
 
         var aggregateName = "aggregateName";
@@ -54,7 +55,7 @@ class EventStoreTest {
     }
 
     @Test
-    void publishAppendsEventToEventStore() throws DomainEventAlreadyPublished {
+    void publishAppendsEventToEventStore() {
         var eventStore = new EventStore();
         var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "aggregateName", UUID.randomUUID());
 
@@ -63,7 +64,7 @@ class EventStoreTest {
     }
 
     @Test
-    void publishThrowsExceptionWhenSameEventIsPublishedTwice() throws DomainEventAlreadyPublished {
+    void publishThrowsExceptionWhenSameEventIsPublishedTwice() {
         var eventStore = new EventStore();
         var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "aggregateName", UUID.randomUUID());
         eventStore.publish(event);

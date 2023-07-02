@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
+import com.github.santosleijon.voidiummarket.common.eventstore.errors.DomainEventAlreadyPublished;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -14,7 +15,7 @@ public class EventStore {
 
     private final List<DomainEvent> events = new ArrayList<>();
 
-    public void publish(DomainEvent event) throws DomainEventAlreadyPublished {
+    public void publish(DomainEvent event) {
         var existingEventWithSameID = events.stream()
                 .filter(e -> e.getId() == event.getId())
                 .findFirst()
