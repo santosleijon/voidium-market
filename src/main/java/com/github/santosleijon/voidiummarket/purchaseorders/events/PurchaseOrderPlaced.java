@@ -5,20 +5,19 @@ import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Currency;
 import java.util.UUID;
 
 public class PurchaseOrderPlaced extends DomainEvent {
 
     private final int unitsCount;
     private final BigDecimal pricePerUnit;
-    private final Currency currency;
+    private final Instant validTo;
 
-    public PurchaseOrderPlaced(UUID id, Instant date, UUID aggregateId, int unitsCount, BigDecimal pricePerUnit, Currency currency) {
+    public PurchaseOrderPlaced(UUID id, Instant date, UUID aggregateId, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
         super(id, date, PurchaseOrder.aggregateName, aggregateId);
         this.unitsCount = unitsCount;
         this.pricePerUnit = pricePerUnit;
-        this.currency = currency;
+        this.validTo = validTo;
     }
 
     public int getUnitsCount() {
@@ -29,7 +28,7 @@ public class PurchaseOrderPlaced extends DomainEvent {
         return pricePerUnit;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public Instant getValidTo() {
+        return validTo;
     }
 }

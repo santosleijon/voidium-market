@@ -38,7 +38,7 @@ public class PurchaseOrdersService {
 
         purchaseOrdersRepository.save(purchaseOrder);
 
-        log.info("PurchaseOrder {}: Buy {} units to unit price of {} {}", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit(), purchaseOrder.getCurrency().getCurrencyCode());
+        log.info("PurchaseOrder {}: Buy {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
     }
 
     public void delete(UUID id) {
@@ -55,6 +55,6 @@ public class PurchaseOrdersService {
             throw new PurchaseOrderNotDeleted(id, e);
         }
 
-        log.info("PurchaseOrder {}: Delete order of {} units to unit price of {} {}", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit(), purchaseOrder.getCurrency().getCurrencyCode());
+        log.info("PurchaseOrder {}: Delete order of {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
     }
 }

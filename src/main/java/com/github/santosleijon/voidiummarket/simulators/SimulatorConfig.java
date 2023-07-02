@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 
 @ConfigurationProperties(prefix = "simulator")
 @ConfigurationPropertiesScan
@@ -19,8 +18,6 @@ public class SimulatorConfig {
     private int buyerMaxUnitsCount = 4;
     private BigDecimal buyerMinPricePerUnit = BigDecimal.valueOf(5.00);
     private BigDecimal buyerMaxPricePerUnit = BigDecimal.valueOf(15.00);
-
-    private Currency currency = Currency.getInstance("SEK");
 
     public int getSellerMinUnitsCount() {
         return sellerMinUnitsCount;
@@ -84,13 +81,5 @@ public class SimulatorConfig {
 
     public void setBuyerMaxPricePerUnit(BigDecimal buyerMaxPricePerUnit) {
         this.buyerMaxPricePerUnit = buyerMaxPricePerUnit;
-    }
-
-    public Currency getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
     }
 }

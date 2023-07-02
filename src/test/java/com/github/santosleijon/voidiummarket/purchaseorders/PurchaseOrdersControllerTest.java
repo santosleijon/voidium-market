@@ -13,7 +13,6 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,11 +90,13 @@ class PurchaseOrdersControllerTest {
     }
 
     private PurchaseOrder createTestPurchaseOrder() {
+        var now = Instant.now();
+
         return new PurchaseOrder(
                 UUID.randomUUID(),
-                Instant.now(),
+                now,
                 1,
                 BigDecimal.ONE,
-                Currency.getInstance("SEK"));
+                now.plusSeconds(5));
     }
 }

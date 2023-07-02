@@ -10,7 +10,6 @@ import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderPlaced;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
-import java.util.Currency;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -21,15 +20,15 @@ public class SaleOrder extends AggregateRoot {
 
     private int unitsCount;
     private BigDecimal pricePerUnit;
-    private Currency currency;
     private Instant placedDate;
+    private Instant validTo;
     private boolean deleted;
 
     @JsonCreator
-    public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Currency currency) {
+    public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
         super(aggregateName, id);
 
-        var initEvent = new SaleOrderPlaced(id, placedDate, id, unitsCount, pricePerUnit.setScale(2, RoundingMode.HALF_UP), currency);
+        var initEvent = new SaleOrderPlaced(id, placedDate, id, unitsCount, pricePerUnit.setScale(2, RoundingMode.HALF_UP), validTo);
         this.apply(initEvent);
     }
 
@@ -46,12 +45,12 @@ public class SaleOrder extends AggregateRoot {
         return pricePerUnit;
     }
 
-    public Currency getCurrency() {
-        return currency;
-    }
-
     public Instant getPlacedDate() {
         return placedDate;
+    }
+
+    public Instant getValidTo() {
+        return validTo;
     }
 
     public boolean isDeleted() {
@@ -72,8 +71,8 @@ public class SaleOrder extends AggregateRoot {
             this.id = saleOrderPlaced.getId();
             this.unitsCount = saleOrderPlaced.getUnitsCount();
             this.pricePerUnit = saleOrderPlaced.getPricePerUnit();
-            this.currency = saleOrderPlaced.getCurrency();
             this.placedDate = saleOrderPlaced.getDate();
+            this.validTo = saleOrderPlaced.getValidTo();
             this.deleted = false;
         } else if (event instanceof SaleOrderDeleted) {
             this.deleted = true;
@@ -87,7 +86,7 @@ public class SaleOrder extends AggregateRoot {
                 this.id,
                 this.unitsCount,
                 this.pricePerUnit,
-                this.currency,
+                this.validTo,
                 this.deleted
         );
     }
@@ -97,11 +96,11 @@ public class SaleOrder extends AggregateRoot {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SaleOrder saleOrder = (SaleOrder) o;
-        return id.equals(saleOrder.id) && unitsCount == saleOrder.unitsCount && deleted == saleOrder.deleted && pricePerUnit.equals(saleOrder.pricePerUnit) && currency.equals(saleOrder.currency);
+        return id.equals(saleOrder.id) && unitsCount == saleOrder.unitsCount && deleted == saleOrder.deleted && pricePerUnit.equals(saleOrder.pricePerUnit) && validTo.equals(saleOrder.validTo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(unitsCount, pricePerUnit, currency, deleted);
+        return Objects.hash(unitsCount, pricePerUnit, validTo, deleted);
     }
 }

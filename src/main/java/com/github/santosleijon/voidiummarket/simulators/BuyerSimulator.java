@@ -50,6 +50,8 @@ public class BuyerSimulator {
         var id = UUID.randomUUID();
         var placedDate = Instant.now();
 
-        return new PurchaseOrder(id, placedDate, unitsCount, pricePerUnit, simulatorConfig.getCurrency());
+        var validTo = placedDate.plusSeconds(60);
+
+        return new PurchaseOrder(id, placedDate, unitsCount, pricePerUnit, validTo);
     }
 }
