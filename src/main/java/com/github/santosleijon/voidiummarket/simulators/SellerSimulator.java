@@ -33,6 +33,10 @@ public class SellerSimulator {
 
     @Scheduled(fixedRate = 2000)
     public void run() {
+        if (!simulatorConfig.isEnabled()) {
+            return;
+        }
+
         log.info("SellersSimulator execution #{}: Started", executionCount);
 
         var newSaleOrder = createNewSaleOrder();

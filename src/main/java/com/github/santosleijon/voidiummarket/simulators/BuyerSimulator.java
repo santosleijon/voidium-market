@@ -33,6 +33,10 @@ public class BuyerSimulator {
 
     @Scheduled(fixedRate = 2000)
     public void run() {
+        if (!simulatorConfig.isEnabled()) {
+            return;
+        }
+
         log.info("BuyerSimulator execution #{}: Started", executionCount);
 
         var newPurchaseOrder = createNewPurchaseOrder();

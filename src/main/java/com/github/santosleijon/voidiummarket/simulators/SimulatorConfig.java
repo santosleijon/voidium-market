@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 @ConfigurationPropertiesScan
 public class SimulatorConfig {
 
+    private boolean enabled = true;
+
     private int sellerMinUnitsCount = 1;
     private int sellerMaxUnitsCount = 4;
     private BigDecimal sellerMinPricePerUnit = BigDecimal.valueOf(10.00);
@@ -18,6 +20,14 @@ public class SimulatorConfig {
     private int buyerMaxUnitsCount = 4;
     private BigDecimal buyerMinPricePerUnit = BigDecimal.valueOf(5.00);
     private BigDecimal buyerMaxPricePerUnit = BigDecimal.valueOf(15.00);
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 
     public int getSellerMinUnitsCount() {
         return sellerMinUnitsCount;
