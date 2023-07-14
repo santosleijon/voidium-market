@@ -5,9 +5,9 @@ import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class PurchaseOrdersRepository {
@@ -45,17 +45,9 @@ public class PurchaseOrdersRepository {
     public List<PurchaseOrder> getAll() {
         var eventsByPurchaseOrderId = eventStore.getEventsByAggregateName(PurchaseOrder.aggregateName);
 
-        var purchaseOrders = new ArrayList<PurchaseOrder>();
-
-        for (var purchaseOrderEntry : eventsByPurchaseOrderId.entrySet()) {
-            var purchaseOrder = new PurchaseOrder(purchaseOrderEntry.getKey(), purchaseOrderEntry.getValue());
-
-            if (!purchaseOrder.isDeleted()) {
-                purchaseOrders.add(purchaseOrder);
-            }
-        }
-
-        return purchaseOrders;
+        return eventsByPurchaseOrderId.entrySet().stream()
+                .map(purchaseOrderEntry -> new PurchaseOrder(purchaseOrderEntry.getKey(), purchaseOrderEntry.getValue()))
+                .collect(Collectors.toList());
     }
 
     public void save(PurchaseOrder purchaseOrder) {
