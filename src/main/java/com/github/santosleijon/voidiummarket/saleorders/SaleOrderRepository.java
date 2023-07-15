@@ -10,12 +10,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
-public class SaleOrdersRepository {
+public class SaleOrderRepository {
 
     private final EventStore eventStore;
 
     @Autowired
-    public SaleOrdersRepository(EventStore eventStore) {
+    public SaleOrderRepository(EventStore eventStore) {
         this.eventStore = eventStore;
     }
 

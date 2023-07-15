@@ -1,6 +1,6 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
-import com.github.santosleijon.voidiummarket.saleorders.SaleOrdersService;
+import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,24 +13,24 @@ class SellerSimulatorTest {
 
     private final SimulatorConfig simulatorConfig;
     private final RandomUtil randomUtil;
-    private final SaleOrdersService saleOrdersService;
+    private final SaleOrderService saleOrderService;
 
     @Autowired
-    public SellerSimulatorTest(SimulatorConfig simulatorConfig, RandomUtil randomUtil, SaleOrdersService saleOrdersService) {
+    public SellerSimulatorTest(SimulatorConfig simulatorConfig, RandomUtil randomUtil, SaleOrderService saleOrderService) {
         this.simulatorConfig = simulatorConfig;
         this.randomUtil = randomUtil;
-        this.saleOrdersService = saleOrdersService;
+        this.saleOrderService = saleOrderService;
     }
 
     @Test
     void runShouldCreateSaleOrder() {
         simulatorConfig.setEnabled(true);
 
-        var sellerSimulator = new SellerSimulator(simulatorConfig, randomUtil, saleOrdersService);
+        var sellerSimulator = new SellerSimulator(simulatorConfig, randomUtil, saleOrderService);
 
         sellerSimulator.run();
 
-        var saleOrders = saleOrdersService.getAll();
+        var saleOrders = saleOrderService.getAll();
 
         Assertions.assertThat(saleOrders.size()).isEqualTo(1);
 

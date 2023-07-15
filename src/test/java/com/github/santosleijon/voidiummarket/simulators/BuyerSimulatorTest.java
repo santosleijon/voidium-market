@@ -1,6 +1,6 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
-import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrdersService;
+import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,24 +13,24 @@ class BuyerSimulatorTest {
 
     private final SimulatorConfig simulatorConfig;
     private final RandomUtil randomUtil;
-    private final PurchaseOrdersService purchaseOrdersService;
+    private final PurchaseOrderService purchaseOrderService;
 
     @Autowired
-    public BuyerSimulatorTest(SimulatorConfig simulatorConfig, RandomUtil randomUtil, PurchaseOrdersService purchaseOrdersService) {
+    public BuyerSimulatorTest(SimulatorConfig simulatorConfig, RandomUtil randomUtil, PurchaseOrderService purchaseOrderService) {
         this.simulatorConfig = simulatorConfig;
         this.randomUtil = randomUtil;
-        this.purchaseOrdersService = purchaseOrdersService;
+        this.purchaseOrderService = purchaseOrderService;
     }
 
     @Test
     void runShouldCreatePurchaseOrder() {
         simulatorConfig.setEnabled(true);
 
-        var buyerSimulator = new BuyerSimulator(simulatorConfig, randomUtil, purchaseOrdersService);
+        var buyerSimulator = new BuyerSimulator(simulatorConfig, randomUtil, purchaseOrderService);
 
         buyerSimulator.run();
 
-        var purchaseOrders = purchaseOrdersService.getAll();
+        var purchaseOrders = purchaseOrderService.getAll();
 
         Assertions.assertThat(purchaseOrders.size()).isEqualTo(1);
 

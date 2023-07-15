@@ -12,26 +12,26 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class SaleOrdersService {
+public class SaleOrderService {
 
-    private static final Logger log = LoggerFactory.getLogger(SaleOrdersService.class);
+    private static final Logger log = LoggerFactory.getLogger(SaleOrderService.class);
 
-    private final SaleOrdersRepository saleOrdersRepository;
+    private final SaleOrderRepository saleOrderRepository;
     private final TransactionService transactionService;
 
     @Autowired
-    public SaleOrdersService(SaleOrdersRepository saleOrdersRepository, TransactionService transactionService) {
-        this.saleOrdersRepository = saleOrdersRepository;
+    public SaleOrderService(SaleOrderRepository saleOrderRepository, TransactionService transactionService) {
+        this.saleOrderRepository = saleOrderRepository;
         this.transactionService = transactionService;
     }
 
     public List<SaleOrder> getAll() {
-        return saleOrdersRepository.getAll();
+        return saleOrderRepository.getAll();
     }
 
     @Nullable
     public SaleOrder get(UUID id) {
-        var saleOrder = saleOrdersRepository.get(id);
+        var saleOrder = saleOrderRepository.get(id);
 
         if (saleOrder == null) {
             return null;
@@ -43,17 +43,17 @@ public class SaleOrdersService {
     }
 
     public void place(SaleOrder saleOrder) {
-        if (saleOrdersRepository.exists(saleOrder.getId())) {
+        if (saleOrderRepository.exists(saleOrder.getId())) {
             return;
         }
 
-        saleOrdersRepository.save(saleOrder);
+        saleOrderRepository.save(saleOrder);
 
         log.info("SaleOrder {}: Sell {} units to unit price of {} CU", saleOrder.getId(), saleOrder.getUnitsCount(), saleOrder.getPricePerUnit());
     }
 
     public void delete(UUID id) {
-        var saleOrder = saleOrdersRepository.get(id);
+        var saleOrder = saleOrderRepository.get(id);
 
         if (saleOrder == null) {
             return;
@@ -61,7 +61,7 @@ public class SaleOrdersService {
 
         try {
             saleOrder.delete();
-            saleOrdersRepository.save(saleOrder);
+            saleOrderRepository.save(saleOrder);
 
             log.info("SaleOrder {}: Delete order of {} units to unit price of {} CU", saleOrder.getId(), saleOrder.getUnitsCount(), saleOrder.getPricePerUnit());
         } catch (Exception e) {

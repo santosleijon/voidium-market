@@ -20,17 +20,17 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:test-application.properties")
-class SaleOrdersControllerTest {
+class SaleOrderControllerTest {
 
-    private final SaleOrdersService saleOrdersService;
-    private final SaleOrdersController saleOrdersController;
+    private final SaleOrderService saleOrderService;
+    private final SaleOrderController saleOrderController;
     private final TransactionService transactionService;
     private final TestHttpClient testHttpClient;
 
     @Autowired
-    SaleOrdersControllerTest(SaleOrdersService saleOrdersService, SaleOrdersController saleOrdersController, TransactionService transactionService, TestHttpClient testHttpClient) {
-        this.saleOrdersService = saleOrdersService;
-        this.saleOrdersController = saleOrdersController;
+    SaleOrderControllerTest(SaleOrderService saleOrderService, SaleOrderController saleOrderController, TransactionService transactionService, TestHttpClient testHttpClient) {
+        this.saleOrderService = saleOrderService;
+        this.saleOrderController = saleOrderController;
         this.testHttpClient = testHttpClient;
         this.transactionService = transactionService;
     }
@@ -40,8 +40,8 @@ class SaleOrdersControllerTest {
         var testSaleOrder1 = new SaleOrderBuilder().build();
         var testSaleOrder2 = new SaleOrderBuilder().build();
 
-        saleOrdersService.place(testSaleOrder1);
-        saleOrdersService.place(testSaleOrder2);
+        saleOrderService.place(testSaleOrder1);
+        saleOrderService.place(testSaleOrder2);
 
         var getAllResult = testHttpClient.get("/sale-orders", new TypeReference<List<SaleOrderDTO>>() { });
 
@@ -60,8 +60,8 @@ class SaleOrdersControllerTest {
 
         var irrelevantSaleOrder = new SaleOrderBuilder().build();
 
-        saleOrdersService.place(expectedSaleOrder);
-        saleOrdersService.place(irrelevantSaleOrder);
+        saleOrderService.place(expectedSaleOrder);
+        saleOrderService.place(irrelevantSaleOrder);
         transactionService.complete(expectedTransaction);
 
         var actualResult = testHttpClient.get("/sale-orders/" + expectedSaleOrderId, new TypeReference<SaleOrderDTO>() { });
@@ -86,7 +86,7 @@ class SaleOrdersControllerTest {
 
         testHttpClient.post("/sale-orders", testSaleOrder);
 
-        var getPlacedSaleOrderResult = saleOrdersController.get(testSaleOrder.getId());
+        var getPlacedSaleOrderResult = saleOrderController.get(testSaleOrder.getId());
 
         Assertions.assertThat(getPlacedSaleOrderResult).isEqualTo(testSaleOrder.setTransactions(Collections.emptyList()).toDTO());
     }
@@ -95,15 +95,15 @@ class SaleOrdersControllerTest {
     void deleteShouldMakeSaleOrderNotRetrievable() {
         var testSaleOrder = new SaleOrderBuilder().build();
 
-        saleOrdersService.place(testSaleOrder);
+        saleOrderService.place(testSaleOrder);
 
         var deleteSaleOrderId = testSaleOrder.getId();
 
-        saleOrdersController.delete(deleteSaleOrderId);
+        saleOrderController.delete(deleteSaleOrderId);
 
-        Assertions.assertThatThrownBy(() -> saleOrdersController.get(deleteSaleOrderId))
+        Assertions.assertThatThrownBy(() -> saleOrderController.get(deleteSaleOrderId))
                 .isInstanceOf(SaleOrderNotFound.class);
 
-        Assertions.assertThat(saleOrdersController.getAll()).doesNotContain(testSaleOrder.toDTO());
+        Assertions.assertThat(saleOrderController.getAll()).doesNotContain(testSaleOrder.toDTO());
     }
 }

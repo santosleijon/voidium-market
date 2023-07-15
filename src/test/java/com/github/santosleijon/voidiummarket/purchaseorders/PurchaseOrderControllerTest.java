@@ -20,17 +20,17 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:test-application.properties")
-class PurchaseOrdersControllerTest {
+class PurchaseOrderControllerTest {
 
-    private final PurchaseOrdersService purchaseOrdersService;
-    private final PurchaseOrdersController purchaseOrdersController;
+    private final PurchaseOrderService purchaseOrderService;
+    private final PurchaseOrderController purchaseOrderController;
     private final TransactionService transactionService;
     private final TestHttpClient testHttpClient;
 
     @Autowired
-    PurchaseOrdersControllerTest(PurchaseOrdersService purchaseOrdersService, PurchaseOrdersController purchaseOrdersController, TransactionService transactionService, TestHttpClient testHttpClient) {
-        this.purchaseOrdersService = purchaseOrdersService;
-        this.purchaseOrdersController = purchaseOrdersController;
+    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionService transactionService, TestHttpClient testHttpClient) {
+        this.purchaseOrderService = purchaseOrderService;
+        this.purchaseOrderController = purchaseOrderController;
         this.transactionService = transactionService;
         this.testHttpClient = testHttpClient;
     }
@@ -39,7 +39,7 @@ class PurchaseOrdersControllerTest {
     void getAllShouldReturnAllPurchaseOrders() {
         var testPurchaseOrder = new PurchaseOrderBuilder().build();
 
-        purchaseOrdersService.place(testPurchaseOrder);
+        purchaseOrderService.place(testPurchaseOrder);
 
         var getPurchaseOrdersResult = testHttpClient.get("/purchase-orders", new TypeReference<List<PurchaseOrderDTO>>() { });
 
@@ -59,8 +59,8 @@ class PurchaseOrdersControllerTest {
 
         var irrelevantPurchaseOrder = new PurchaseOrderBuilder().build();
 
-        purchaseOrdersService.place(expectedPurchaseOrder);
-        purchaseOrdersService.place(irrelevantPurchaseOrder);
+        purchaseOrderService.place(expectedPurchaseOrder);
+        purchaseOrderService.place(irrelevantPurchaseOrder);
         transactionService.complete(expectedTransaction);
 
         var actualPurchaseOrder = testHttpClient.get("/purchase-orders/" + expectedPurchaseOrder.getId(), new TypeReference<PurchaseOrderDTO>() { });
@@ -85,7 +85,7 @@ class PurchaseOrdersControllerTest {
 
         testHttpClient.post("/purchase-orders", testPurchaseOrder);
 
-        var getPlacedPurchaseOrderResult = purchaseOrdersController.get(testPurchaseOrder.getId());
+        var getPlacedPurchaseOrderResult = purchaseOrderController.get(testPurchaseOrder.getId());
 
         Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(testPurchaseOrder.setTransactions(Collections.emptyList()).toDTO());
     }
@@ -94,13 +94,13 @@ class PurchaseOrdersControllerTest {
     void deletePurchaseOrderShouldMakePurchaseOrderNotRetrievable() {
         var testPurchaseOrder = new PurchaseOrderBuilder().build();
 
-        purchaseOrdersService.place(testPurchaseOrder);
+        purchaseOrderService.place(testPurchaseOrder);
 
         testHttpClient.delete("/purchase-orders/" + testPurchaseOrder.getId());
 
-        Assertions.assertThatThrownBy(() -> purchaseOrdersController.get(testPurchaseOrder.getId()))
+        Assertions.assertThatThrownBy(() -> purchaseOrderController.get(testPurchaseOrder.getId()))
                 .isInstanceOf(PurchaseOrderNotFound.class);
 
-        Assertions.assertThat(purchaseOrdersController.getAll()).doesNotContain(testPurchaseOrder.toDTO());
+        Assertions.assertThat(purchaseOrderController.getAll()).doesNotContain(testPurchaseOrder.toDTO());
     }
 }

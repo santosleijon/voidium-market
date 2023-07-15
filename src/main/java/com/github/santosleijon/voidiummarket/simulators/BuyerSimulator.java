@@ -1,7 +1,7 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
-import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrdersService;
+import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +18,17 @@ public class BuyerSimulator {
 
     private final RandomUtil randomUtil;
 
-    private final PurchaseOrdersService purchaseOrdersService;
+    private final PurchaseOrderService purchaseOrderService;
 
     private static final Logger log = LoggerFactory.getLogger(BuyerSimulator.class);
 
     private int executionCount = 0;
 
     @Autowired
-    public BuyerSimulator(SimulatorConfig simulatorConfig, RandomUtil randomUtil, PurchaseOrdersService purchaseOrdersService) {
+    public BuyerSimulator(SimulatorConfig simulatorConfig, RandomUtil randomUtil, PurchaseOrderService purchaseOrderService) {
         this.simulatorConfig = simulatorConfig;
         this.randomUtil = randomUtil;
-        this.purchaseOrdersService = purchaseOrdersService;
+        this.purchaseOrderService = purchaseOrderService;
     }
 
     @Scheduled(fixedRate = 2000)
@@ -41,7 +41,7 @@ public class BuyerSimulator {
 
         var newPurchaseOrder = createNewPurchaseOrder();
 
-        purchaseOrdersService.place(newPurchaseOrder);
+        purchaseOrderService.place(newPurchaseOrder);
 
         log.info("BuyerSimulator execution #{}: Finished", executionCount);
         executionCount++;

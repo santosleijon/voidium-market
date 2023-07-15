@@ -9,40 +9,40 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-public class PurchaseOrdersController {
+public class PurchaseOrderController {
 
-    private final PurchaseOrdersService purchaseOrdersService;
+    private final PurchaseOrderService purchaseOrderService;
 
     @Autowired
-    public PurchaseOrdersController(PurchaseOrdersService purchaseOrdersService) {
-        this.purchaseOrdersService = purchaseOrdersService;
+    public PurchaseOrderController(PurchaseOrderService purchaseOrderService) {
+        this.purchaseOrderService = purchaseOrderService;
     }
 
     @GetMapping("/purchase-orders")
     public List<PurchaseOrderDTO> getAll() {
-        return purchaseOrdersService.getAll().stream()
+        return purchaseOrderService.getAll().stream()
                 .map(PurchaseOrder::toDTO)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/purchase-orders/{id}")
     public PurchaseOrderDTO get(@PathVariable UUID id) {
-        var purchaseOrder = purchaseOrdersService.get(id);
+        var purchaseOrder = purchaseOrderService.get(id);
 
         if (purchaseOrder == null) {
             throw new PurchaseOrderNotFound();
         }
 
-        return purchaseOrdersService.get(id).toDTO();
+        return purchaseOrderService.get(id).toDTO();
     }
 
     @PostMapping("/purchase-orders")
     public void place(@RequestBody PurchaseOrder purchaseOrder) {
-        purchaseOrdersService.place(purchaseOrder);
+        purchaseOrderService.place(purchaseOrder);
     }
 
     @DeleteMapping("/purchase-orders/{id}")
     public void delete(@PathVariable UUID id) {
-        purchaseOrdersService.delete(id);
+        purchaseOrderService.delete(id);
     }
 }

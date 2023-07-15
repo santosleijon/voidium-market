@@ -1,7 +1,7 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
-import com.github.santosleijon.voidiummarket.saleorders.SaleOrdersService;
+import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +18,17 @@ public class SellerSimulator {
 
     private final RandomUtil randomUtil;
 
-    private final SaleOrdersService saleOrdersService;
+    private final SaleOrderService saleOrderService;
 
     private static final Logger log = LoggerFactory.getLogger(SellerSimulator.class);
 
     private int executionCount = 0;
 
     @Autowired
-    public SellerSimulator(SimulatorConfig simulatorConfig, RandomUtil randomUtil, SaleOrdersService saleOrdersService) {
+    public SellerSimulator(SimulatorConfig simulatorConfig, RandomUtil randomUtil, SaleOrderService saleOrderService) {
         this.simulatorConfig = simulatorConfig;
         this.randomUtil = randomUtil;
-        this.saleOrdersService = saleOrdersService;
+        this.saleOrderService = saleOrderService;
     }
 
     @Scheduled(fixedRate = 2000)
@@ -41,7 +41,7 @@ public class SellerSimulator {
 
         var newSaleOrder = createNewSaleOrder();
 
-        saleOrdersService.place(newSaleOrder);
+        saleOrderService.place(newSaleOrder);
 
         log.info("SellersSimulator execution #{}: Finished", executionCount);
         executionCount++;

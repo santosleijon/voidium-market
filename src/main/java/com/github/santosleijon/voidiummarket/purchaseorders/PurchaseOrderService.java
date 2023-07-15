@@ -12,26 +12,26 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class PurchaseOrdersService {
+public class PurchaseOrderService {
 
-    private final PurchaseOrdersRepository purchaseOrdersRepository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
     private final TransactionService transactionService;
 
-    private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersService.class);
+    private static final Logger log = LoggerFactory.getLogger(PurchaseOrderService.class);
 
     @Autowired
-    public PurchaseOrdersService(PurchaseOrdersRepository purchaseOrdersRepository, TransactionService transactionService) {
-        this.purchaseOrdersRepository = purchaseOrdersRepository;
+    public PurchaseOrderService(PurchaseOrderRepository purchaseOrderRepository, TransactionService transactionService) {
+        this.purchaseOrderRepository = purchaseOrderRepository;
         this.transactionService = transactionService;
     }
 
     public List<PurchaseOrder> getAll() {
-        return purchaseOrdersRepository.getAll();
+        return purchaseOrderRepository.getAll();
     }
 
     @Nullable
     public PurchaseOrder get(UUID id) {
-        var purchaseOrder = purchaseOrdersRepository.get(id);
+        var purchaseOrder = purchaseOrderRepository.get(id);
 
         if (purchaseOrder == null) {
             return null;
@@ -43,17 +43,17 @@ public class PurchaseOrdersService {
     }
 
     public void place(PurchaseOrder purchaseOrder) {
-        if (purchaseOrdersRepository.exists(purchaseOrder.getId())) {
+        if (purchaseOrderRepository.exists(purchaseOrder.getId())) {
             return;
         }
 
-        purchaseOrdersRepository.save(purchaseOrder);
+        purchaseOrderRepository.save(purchaseOrder);
 
         log.info("PurchaseOrder {}: Buy {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
     }
 
     public void delete(UUID id) {
-        var purchaseOrder = purchaseOrdersRepository.get(id);
+        var purchaseOrder = purchaseOrderRepository.get(id);
 
         if (purchaseOrder == null) {
             return;
@@ -61,7 +61,7 @@ public class PurchaseOrdersService {
 
         try {
             purchaseOrder.delete();
-            purchaseOrdersRepository.save(purchaseOrder);
+            purchaseOrderRepository.save(purchaseOrder);
         } catch (Exception e) {
             throw new PurchaseOrderNotDeleted(id, e);
         }

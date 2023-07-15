@@ -9,40 +9,40 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-public class SaleOrdersController {
+public class SaleOrderController {
 
-    private final SaleOrdersService saleOrdersService;
+    private final SaleOrderService saleOrderService;
 
     @Autowired
-    public SaleOrdersController(SaleOrdersService saleOrdersService) {
-        this.saleOrdersService = saleOrdersService;
+    public SaleOrderController(SaleOrderService saleOrderService) {
+        this.saleOrderService = saleOrderService;
     }
 
     @GetMapping("/sale-orders")
     public List<SaleOrderDTO> getAll() {
-        return saleOrdersService.getAll().stream()
+        return saleOrderService.getAll().stream()
                 .map(SaleOrder::toDTO)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("/sale-orders/{id}")
     public SaleOrderDTO get(@PathVariable UUID id) {
-        var saleOrder = saleOrdersService.get(id);
+        var saleOrder = saleOrderService.get(id);
 
         if (saleOrder == null) {
             throw new SaleOrderNotFound();
         }
 
-        return saleOrdersService.get(id).toDTO();
+        return saleOrderService.get(id).toDTO();
     }
 
     @PostMapping("/sale-orders")
     public void place(@RequestBody SaleOrder saleOrder) {
-        saleOrdersService.place(saleOrder);
+        saleOrderService.place(saleOrder);
     }
 
     @DeleteMapping("/sale-orders/{id}")
     public void delete(@PathVariable UUID id) {
-        saleOrdersService.delete(id);
+        saleOrderService.delete(id);
     }
 }
