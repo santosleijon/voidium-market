@@ -6,6 +6,9 @@ import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.UnexpectedDomainEvent;
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderDeleted;
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderPlaced;
+import com.github.santosleijon.voidiummarket.transactions.Transaction;
+import com.github.santosleijon.voidiummarket.transactions.TransactionDTO;
+import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,6 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SaleOrder extends AggregateRoot {
 
@@ -23,6 +27,9 @@ public class SaleOrder extends AggregateRoot {
     private Instant placedDate;
     private Instant validTo;
     private boolean deleted;
+
+    @Nullable
+    private List<Transaction> transactions;
 
     @JsonCreator
     public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
@@ -57,6 +64,16 @@ public class SaleOrder extends AggregateRoot {
         return deleted;
     }
 
+    @Nullable
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public SaleOrder setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
+        return this;
+    }
+
     public void delete() {
         var eventId = UUID.randomUUID();
         var removedDate = Instant.now();
@@ -82,12 +99,21 @@ public class SaleOrder extends AggregateRoot {
     }
 
     public SaleOrderDTO toDTO() {
+        List<TransactionDTO> transactionDTOs = null;
+
+        if (transactions != null) {
+            transactionDTOs = transactions.stream()
+                    .map(t -> new TransactionDTO(t.getId(), t.getPurchaseOrderId(), t.getSaleOrderId()))
+                    .collect(Collectors.toList());
+        }
+
         return new SaleOrderDTO(
                 this.id,
                 this.unitsCount,
                 this.pricePerUnit,
                 this.validTo,
-                this.deleted
+                this.deleted,
+                transactionDTOs
         );
     }
 

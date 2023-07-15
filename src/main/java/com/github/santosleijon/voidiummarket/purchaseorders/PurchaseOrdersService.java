@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotDeleted;
+import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +15,14 @@ import java.util.UUID;
 public class PurchaseOrdersService {
 
     private final PurchaseOrdersRepository purchaseOrdersRepository;
+    private final TransactionService transactionService;
 
     private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersService.class);
 
     @Autowired
-    public PurchaseOrdersService(PurchaseOrdersRepository purchaseOrdersRepository) {
+    public PurchaseOrdersService(PurchaseOrdersRepository purchaseOrdersRepository, TransactionService transactionService) {
         this.purchaseOrdersRepository = purchaseOrdersRepository;
+        this.transactionService = transactionService;
     }
 
     public List<PurchaseOrder> getAll() {
@@ -28,7 +31,15 @@ public class PurchaseOrdersService {
 
     @Nullable
     public PurchaseOrder get(UUID id) {
-        return purchaseOrdersRepository.get(id);
+        var purchaseOrder = purchaseOrdersRepository.get(id);
+
+        if (purchaseOrder == null) {
+            return null;
+        }
+
+        var transactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+
+        return purchaseOrder.setTransactions(transactions);
     }
 
     public void place(PurchaseOrder purchaseOrder) {

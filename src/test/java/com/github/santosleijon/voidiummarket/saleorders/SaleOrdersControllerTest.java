@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.saleorders.errors.SaleOrderNotFound;
+import com.github.santosleijon.voidiummarket.transactions.Transaction;
+import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,19 +24,21 @@ class SaleOrdersControllerTest {
 
     private final SaleOrdersService saleOrdersService;
     private final SaleOrdersController saleOrdersController;
+    private final TransactionService transactionService;
     private final TestHttpClient testHttpClient;
 
     @Autowired
-    SaleOrdersControllerTest(SaleOrdersService saleOrdersService, SaleOrdersController saleOrdersController, TestHttpClient testHttpClient) {
+    SaleOrdersControllerTest(SaleOrdersService saleOrdersService, SaleOrdersController saleOrdersController, TransactionService transactionService, TestHttpClient testHttpClient) {
         this.saleOrdersService = saleOrdersService;
         this.saleOrdersController = saleOrdersController;
         this.testHttpClient = testHttpClient;
+        this.transactionService = transactionService;
     }
 
     @Test
     void getAllShouldReturnAllSaleOrders() {
-        var testSaleOrder1 = createTestSaleOrder();
-        var testSaleOrder2 = createTestSaleOrder();
+        var testSaleOrder1 = new SaleOrderBuilder().build();
+        var testSaleOrder2 = new SaleOrderBuilder().build();
 
         saleOrdersService.place(testSaleOrder1);
         saleOrdersService.place(testSaleOrder2);
@@ -45,16 +49,24 @@ class SaleOrdersControllerTest {
     }
 
     @Test
-    void getShouldReturnCorrectSaleOrder() {
-        var testSaleOrder1 = createTestSaleOrder();
-        var testSaleOrder2 = createTestSaleOrder();
+    void getShouldReturnCorrectSaleOrderWithTransactionInfo() {
+        var expectedSaleOrderId = UUID.randomUUID();
 
-        saleOrdersService.place(testSaleOrder1);
-        saleOrdersService.place(testSaleOrder2);
+        var expectedTransaction = new Transaction(UUID.randomUUID(), UUID.randomUUID(), expectedSaleOrderId, Instant.now());
 
-        var getResult = testHttpClient.get("/sale-orders/" + testSaleOrder2.getId(), new TypeReference<SaleOrderDTO>() { });
+        var expectedSaleOrder = new SaleOrderBuilder().withId(expectedSaleOrderId)
+                .withTransaction(expectedTransaction)
+                .build();
 
-        Assertions.assertThat(getResult).isEqualTo(testSaleOrder2.toDTO());
+        var irrelevantSaleOrder = new SaleOrderBuilder().build();
+
+        saleOrdersService.place(expectedSaleOrder);
+        saleOrdersService.place(irrelevantSaleOrder);
+        transactionService.complete(expectedTransaction);
+
+        var actualResult = testHttpClient.get("/sale-orders/" + expectedSaleOrderId, new TypeReference<SaleOrderDTO>() { });
+
+        Assertions.assertThat(actualResult).isEqualTo(expectedSaleOrder.toDTO());
     }
 
     @Test
@@ -70,18 +82,18 @@ class SaleOrdersControllerTest {
 
     @Test
     void placeShouldCreateNewSaleOrder() {
-        var testSaleOrder = createTestSaleOrder();
+        var testSaleOrder = new SaleOrderBuilder().build();
 
         testHttpClient.post("/sale-orders", testSaleOrder);
 
         var getPlacedSaleOrderResult = saleOrdersController.get(testSaleOrder.getId());
 
-        Assertions.assertThat(getPlacedSaleOrderResult).isEqualTo(testSaleOrder.toDTO());
+        Assertions.assertThat(getPlacedSaleOrderResult).isEqualTo(testSaleOrder.setTransactions(Collections.emptyList()).toDTO());
     }
 
     @Test
     void deleteShouldMakeSaleOrderNotRetrievable() {
-        var testSaleOrder = createTestSaleOrder();
+        var testSaleOrder = new SaleOrderBuilder().build();
 
         saleOrdersService.place(testSaleOrder);
 
@@ -93,16 +105,5 @@ class SaleOrdersControllerTest {
                 .isInstanceOf(SaleOrderNotFound.class);
 
         Assertions.assertThat(saleOrdersController.getAll()).doesNotContain(testSaleOrder.toDTO());
-    }
-
-    private SaleOrder createTestSaleOrder() {
-        var now = Instant.now();
-
-        return new SaleOrder(
-                UUID.randomUUID(),
-                now,
-                1,
-                BigDecimal.ONE,
-                now.plusSeconds(5));
     }
 }
