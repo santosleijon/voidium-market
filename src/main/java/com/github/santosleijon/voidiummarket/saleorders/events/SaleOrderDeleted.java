@@ -9,6 +9,6 @@ import java.util.UUID;
 public class SaleOrderDeleted extends DomainEvent {
 
     public SaleOrderDeleted(UUID id, Instant date, UUID aggregateId) {
-        super(id, date, SaleOrder.aggregateName, aggregateId);
+        super(id, date, "SaleOrderDeleted", SaleOrder.aggregateName, aggregateId);
     }
 }

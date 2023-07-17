@@ -14,7 +14,7 @@ public class PurchaseOrderPlaced extends DomainEvent {
     private final Instant validTo;
 
     public PurchaseOrderPlaced(UUID id, Instant date, UUID aggregateId, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
-        super(id, date, PurchaseOrder.aggregateName, aggregateId);
+        super(id, date, "PurchaseOrderPlaced", PurchaseOrder.aggregateName, aggregateId);
         this.unitsCount = unitsCount;
         this.pricePerUnit = pricePerUnit;
         this.validTo = validTo;

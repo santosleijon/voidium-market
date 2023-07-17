@@ -12,7 +12,7 @@ public class TransactionCompleted extends DomainEvent {
     private final UUID saleOrderId;
 
     public TransactionCompleted(UUID id, UUID purchaseOrderId, UUID saleOrderId, Instant date) {
-        super(id, date, Transaction.aggregateName, id);
+        super(id, date, "TransactionCompleted", Transaction.aggregateName, id);
 
         this.purchaseOrderId = purchaseOrderId;
         this.saleOrderId = saleOrderId;

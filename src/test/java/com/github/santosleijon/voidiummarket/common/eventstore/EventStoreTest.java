@@ -23,12 +23,13 @@ class EventStoreTest {
     void getEventsReturnsEvents() {
         var eventStore = new EventStore();
 
-        var aggregateName = "aggregateName";
+        var eventType = "testEvent";
+        var aggregateName = "testAggregate";
         var aggregateId = UUID.randomUUID();
 
-        var event1 = new DomainEvent(UUID.randomUUID(), Instant.now(), aggregateName, aggregateId);
+        var event1 = new DomainEvent(UUID.randomUUID(), Instant.now(), eventType, aggregateName, aggregateId);
         eventStore.publish(event1);
-        var event2 = new DomainEvent(UUID.randomUUID(), Instant.now(), aggregateName, aggregateId);
+        var event2 = new DomainEvent(UUID.randomUUID(), Instant.now(), eventType, aggregateName, aggregateId);
         eventStore.publish(event2);
 
         Assertions.assertThat(eventStore.getEvents()).isEqualTo(List.of(event1, event2));
@@ -38,16 +39,17 @@ class EventStoreTest {
     void getEventsForAggregateReturnsRelevantEventsOnly() {
         var eventStore = new EventStore();
 
-        var aggregateName = "aggregateName";
+        var eventType = "testEvent";
+        var aggregateName = "testAggregate";
 
         var firstAggregateId = UUID.randomUUID();
-        var firstAggregateEvent1 = new DomainEvent(UUID.randomUUID(), Instant.now(), aggregateName, firstAggregateId);
+        var firstAggregateEvent1 = new DomainEvent(UUID.randomUUID(), Instant.now(), eventType, aggregateName, firstAggregateId);
         eventStore.publish(firstAggregateEvent1);
-        var firstAggregateEvent2 = new DomainEvent(UUID.randomUUID(), Instant.now(), aggregateName, firstAggregateId);
+        var firstAggregateEvent2 = new DomainEvent(UUID.randomUUID(), Instant.now(), eventType, aggregateName, firstAggregateId);
         eventStore.publish(firstAggregateEvent2);
 
         var secondAggregateId = UUID.randomUUID();
-        var secondAggregateEvent = new DomainEvent(UUID.randomUUID(), Instant.now(), aggregateName, secondAggregateId);
+        var secondAggregateEvent = new DomainEvent(UUID.randomUUID(), Instant.now(), eventType, aggregateName, secondAggregateId);
         eventStore.publish(secondAggregateEvent);
 
         var expectedList = List.of(firstAggregateEvent1, firstAggregateEvent2);
@@ -57,7 +59,7 @@ class EventStoreTest {
     @Test
     void publishAppendsEventToEventStore() {
         var eventStore = new EventStore();
-        var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "aggregateName", UUID.randomUUID());
+        var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "testEvent", "testAggregate", UUID.randomUUID());
 
         eventStore.publish(event);
         Assertions.assertThat(eventStore.getEvents()).isEqualTo(List.of(event));
@@ -66,7 +68,7 @@ class EventStoreTest {
     @Test
     void publishThrowsExceptionWhenSameEventIsPublishedTwice() {
         var eventStore = new EventStore();
-        var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "aggregateName", UUID.randomUUID());
+        var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "testEvent","testAggregate", UUID.randomUUID());
         eventStore.publish(event);
 
         Assertions.assertThatThrownBy(() -> eventStore.publish(event)).isInstanceOf(DomainEventAlreadyPublished.class);

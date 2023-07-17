@@ -14,7 +14,7 @@ public class SaleOrderPlaced extends DomainEvent {
     private final Instant validTo;
 
     public SaleOrderPlaced(UUID id, Instant date, UUID aggregateId, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
-        super(id, date, SaleOrder.aggregateName, aggregateId);
+        super(id, date, "SaleOrderPlaced", SaleOrder.aggregateName, aggregateId);
         this.unitsCount = unitsCount;
         this.pricePerUnit = pricePerUnit;
         this.validTo = validTo;
