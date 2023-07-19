@@ -14,14 +14,14 @@ class EventStoreTest {
 
     @Test
     void getEventsReturnsEmptyListByDefault() {
-        var eventStore = new EventStore();
+        var eventStore = new EventStore(new EventPublisher());
 
         Assertions.assertThat(eventStore.getEvents()).isEqualTo(emptyList());
     }
 
     @Test
     void getEventsReturnsEvents() {
-        var eventStore = new EventStore();
+        var eventStore = new EventStore(new EventPublisher());
 
         var eventType = "testEvent";
         var aggregateName = "testAggregate";
@@ -37,7 +37,7 @@ class EventStoreTest {
 
     @Test
     void getEventsForAggregateReturnsRelevantEventsOnly() {
-        var eventStore = new EventStore();
+        var eventStore = new EventStore(new EventPublisher());
 
         var eventType = "testEvent";
         var aggregateName = "testAggregate";
@@ -58,7 +58,7 @@ class EventStoreTest {
 
     @Test
     void publishAppendsEventToEventStore() {
-        var eventStore = new EventStore();
+        var eventStore = new EventStore(new EventPublisher());
         var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "testEvent", "testAggregate", UUID.randomUUID());
 
         eventStore.publish(event);
@@ -67,7 +67,7 @@ class EventStoreTest {
 
     @Test
     void publishThrowsExceptionWhenSameEventIsPublishedTwice() {
-        var eventStore = new EventStore();
+        var eventStore = new EventStore(new EventPublisher());
         var event = new DomainEvent(UUID.randomUUID(), Instant.now(), "testEvent","testAggregate", UUID.randomUUID());
         eventStore.publish(event);
 

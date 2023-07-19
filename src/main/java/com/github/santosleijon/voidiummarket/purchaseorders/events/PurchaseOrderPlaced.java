@@ -9,12 +9,14 @@ import java.util.UUID;
 
 public class PurchaseOrderPlaced extends DomainEvent {
 
+    public static final String type = "PurchaseOrderPlaced";
+
     private final int unitsCount;
     private final BigDecimal pricePerUnit;
     private final Instant validTo;
 
     public PurchaseOrderPlaced(UUID id, Instant date, UUID aggregateId, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
-        super(id, date, "PurchaseOrderPlaced", PurchaseOrder.aggregateName, aggregateId);
+        super(id, date, type, PurchaseOrder.aggregateName, aggregateId);
         this.unitsCount = unitsCount;
         this.pricePerUnit = pricePerUnit;
         this.validTo = validTo;

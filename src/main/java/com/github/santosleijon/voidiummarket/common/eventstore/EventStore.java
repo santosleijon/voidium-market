@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.DomainEventAlreadyPublished;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -15,6 +16,13 @@ public class EventStore {
 
     private final List<DomainEvent> events = new ArrayList<>();
 
+    private final EventPublisher eventPublisher;
+
+    @Autowired
+    public EventStore(EventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
+
     public void publish(DomainEvent event) {
         var existingEventWithSameID = events.stream()
                 .filter(e -> e.getId() == event.getId())
@@ -26,6 +34,8 @@ public class EventStore {
         }
 
         events.add(event);
+
+        eventPublisher.publish(event);
     }
 
     public List<DomainEvent> getEvents() {
