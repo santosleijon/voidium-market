@@ -37,13 +37,13 @@ public class BuyerSimulator {
             return;
         }
 
-        log.info("BuyerSimulator execution #{}: Started", executionCount);
+        log.debug("BuyerSimulator execution #{}: Started", executionCount);
 
         var newPurchaseOrder = createNewPurchaseOrder();
 
         purchaseOrderService.place(newPurchaseOrder);
 
-        log.info("BuyerSimulator execution #{}: Finished", executionCount);
+        log.debug("BuyerSimulator execution #{}: Finished", executionCount);
         executionCount++;
     }
 

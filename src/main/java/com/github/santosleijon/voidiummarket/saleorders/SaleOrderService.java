@@ -49,7 +49,7 @@ public class SaleOrderService {
 
         saleOrderRepository.save(saleOrder);
 
-        log.info("SaleOrder {}: Sell {} units to unit price of {} CU", saleOrder.getId(), saleOrder.getUnitsCount(), saleOrder.getPricePerUnit());
+        log.info("SaleOrder\t\t\t{}: Sell {} units to unit price of {} CU", saleOrder.getId(), saleOrder.getUnitsCount(), saleOrder.getPricePerUnit());
     }
 
     public void delete(UUID id) {
@@ -63,7 +63,7 @@ public class SaleOrderService {
             saleOrder.delete();
             saleOrderRepository.save(saleOrder);
 
-            log.info("SaleOrder {}: Delete order of {} units to unit price of {} CU", saleOrder.getId(), saleOrder.getUnitsCount(), saleOrder.getPricePerUnit());
+            log.info("SaleOrder\t\t{}: Delete order of {} units to unit price of {} CU", saleOrder.getId(), saleOrder.getUnitsCount(), saleOrder.getPricePerUnit());
         } catch (Exception e) {
             throw new SaleOrderNotDeleted(id, e);
         }

@@ -37,13 +37,13 @@ public class SellerSimulator {
             return;
         }
 
-        log.info("SellersSimulator execution #{}: Started", executionCount);
+        log.debug("SellersSimulator execution #{}: Started", executionCount);
 
         var newSaleOrder = createNewSaleOrder();
 
         saleOrderService.place(newSaleOrder);
 
-        log.info("SellersSimulator execution #{}: Finished", executionCount);
+        log.debug("SellersSimulator execution #{}: Finished", executionCount);
         executionCount++;
     }
 

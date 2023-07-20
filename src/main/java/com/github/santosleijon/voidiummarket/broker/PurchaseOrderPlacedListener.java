@@ -12,16 +12,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class PurchaseOrderPlacedListener extends EventSubscriber {
 
+    private final BrokerService brokerService;
+
     private static final Logger log = LoggerFactory.getLogger(PurchaseOrderPlacedListener.class);
 
-    public PurchaseOrderPlacedListener(@Autowired EventPublisher eventPublisher) {
+    @Autowired
+    public PurchaseOrderPlacedListener(EventPublisher eventPublisher, BrokerService brokerService) {
         super(PurchaseOrderPlaced.type, eventPublisher);
+        this.brokerService = brokerService;
     }
 
     @Override
     public void receive(DomainEvent event) {
         if (event instanceof PurchaseOrderPlaced) {
-            log.info("Detected new purchase order {}", event.getAggregateId());
+            log.debug("Detected new purchase order {}", event.getAggregateId());
+
+            brokerService.brokerAvailableTransactionForPurchaseOrder(event.getAggregateId());
         }
     }
 }

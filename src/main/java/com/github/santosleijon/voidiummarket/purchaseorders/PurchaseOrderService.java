@@ -49,7 +49,7 @@ public class PurchaseOrderService {
 
         purchaseOrderRepository.save(purchaseOrder);
 
-        log.info("PurchaseOrder {}: Buy {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
+        log.info("PurchaseOrder\t{}: Buy {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
     }
 
     public void delete(UUID id) {
@@ -66,6 +66,6 @@ public class PurchaseOrderService {
             throw new PurchaseOrderNotDeleted(id, e);
         }
 
-        log.info("PurchaseOrder {}: Delete order of {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
+        log.info("PurchaseOrder\t{}: Delete order of {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
     }
 }

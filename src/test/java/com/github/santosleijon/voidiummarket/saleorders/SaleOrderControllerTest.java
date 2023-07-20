@@ -5,7 +5,7 @@ import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.saleorders.errors.SaleOrderNotFound;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
-import com.github.santosleijon.voidiummarket.transactions.TransactionService;
+import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +24,15 @@ class SaleOrderControllerTest {
 
     private final SaleOrderService saleOrderService;
     private final SaleOrderController saleOrderController;
-    private final TransactionService transactionService;
+    private final TransactionRepository transactionRepository;
     private final TestHttpClient testHttpClient;
 
     @Autowired
-    SaleOrderControllerTest(SaleOrderService saleOrderService, SaleOrderController saleOrderController, TransactionService transactionService, TestHttpClient testHttpClient) {
+    SaleOrderControllerTest(SaleOrderService saleOrderService, SaleOrderController saleOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient) {
         this.saleOrderService = saleOrderService;
         this.saleOrderController = saleOrderController;
         this.testHttpClient = testHttpClient;
-        this.transactionService = transactionService;
+        this.transactionRepository = transactionRepository;
     }
 
     @Test
@@ -62,7 +62,7 @@ class SaleOrderControllerTest {
 
         saleOrderService.place(expectedSaleOrder);
         saleOrderService.place(irrelevantSaleOrder);
-        transactionService.complete(expectedTransaction);
+        transactionRepository.save(expectedTransaction);
 
         var actualResult = testHttpClient.get("/sale-orders/" + expectedSaleOrderId, new TypeReference<SaleOrderDTO>() { });
 

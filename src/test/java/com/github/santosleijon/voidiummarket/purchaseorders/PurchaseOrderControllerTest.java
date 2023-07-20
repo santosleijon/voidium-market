@@ -5,7 +5,7 @@ import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
-import com.github.santosleijon.voidiummarket.transactions.TransactionService;
+import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,14 @@ class PurchaseOrderControllerTest {
 
     private final PurchaseOrderService purchaseOrderService;
     private final PurchaseOrderController purchaseOrderController;
-    private final TransactionService transactionService;
+    private final TransactionRepository transactionRepository;
     private final TestHttpClient testHttpClient;
 
     @Autowired
-    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionService transactionService, TestHttpClient testHttpClient) {
+    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient) {
         this.purchaseOrderService = purchaseOrderService;
         this.purchaseOrderController = purchaseOrderController;
-        this.transactionService = transactionService;
+        this.transactionRepository = transactionRepository;
         this.testHttpClient = testHttpClient;
     }
 
@@ -61,7 +61,7 @@ class PurchaseOrderControllerTest {
 
         purchaseOrderService.place(expectedPurchaseOrder);
         purchaseOrderService.place(irrelevantPurchaseOrder);
-        transactionService.complete(expectedTransaction);
+        transactionRepository.save(expectedTransaction);
 
         var actualPurchaseOrder = testHttpClient.get("/purchase-orders/" + expectedPurchaseOrder.getId(), new TypeReference<PurchaseOrderDTO>() { });
 
