@@ -54,7 +54,11 @@ public class BrokerService {
 
         var matchingSaleOrder = matchingSaleOrders.get(0);
 
-        var transaction = new Transaction(UUID.randomUUID(), purchaseOrder.getId(), matchingSaleOrder.getId(), Instant.now());
+        var transactionId = UUID.randomUUID();
+        var transactionUnitCount = Math.min(matchingSaleOrder.getUnitsCount(), purchaseOrder.getUnitsCount());
+        var transactionPricePerUnit = matchingSaleOrder.getPricePerUnit();
+
+        var transaction = new Transaction(transactionId, purchaseOrder.getId(), matchingSaleOrder.getId(), transactionUnitCount, transactionPricePerUnit, Instant.now());
 
         transactionRepository.save(transaction);
 

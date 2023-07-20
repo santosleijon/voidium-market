@@ -103,7 +103,7 @@ public class SaleOrder extends AggregateRoot {
 
         if (transactions != null) {
             transactionDTOs = transactions.stream()
-                    .map(t -> new TransactionDTO(t.getId(), t.getPurchaseOrderId(), t.getSaleOrderId()))
+                    .map(t -> new TransactionDTO(t.getId(), t.getPurchaseOrderId(), t.getSaleOrderId(), t.getUnitsCount(), t.getPricePerUnit()))
                     .collect(Collectors.toList());
         }
 
