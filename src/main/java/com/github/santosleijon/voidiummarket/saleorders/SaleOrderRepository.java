@@ -47,7 +47,7 @@ public class SaleOrderRepository {
 
         return eventsBySaleOrderId.entrySet().stream()
                 .map(saleOrderEntry -> new SaleOrder(saleOrderEntry.getKey(), saleOrderEntry.getValue()))
-                .filter(transaction -> !transaction.isDeleted())
+                .filter(saleOrder -> !saleOrder.isDeleted())
                 .collect(Collectors.toList());
     }
 

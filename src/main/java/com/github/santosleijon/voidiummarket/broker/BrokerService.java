@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.broker;
 
+import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
@@ -39,11 +40,11 @@ public class BrokerService {
 
         var purchaseOrder = purchaseOrderService.get(purchaseOrderId);
 
-        if (purchaseOrder == null) {
+        if (purchaseOrder == null || purchaseOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || !purchaseOrder.isValid()) {
             return;
         }
 
-        var matchingSaleOrders = saleOrderService.getAll()
+        var matchingSaleOrders = saleOrderService.getAllWithTransactions()
                 .stream()
                 .filter(saleOrder -> isMatchForTransaction(purchaseOrder, saleOrder))
                 .toList();
@@ -54,19 +55,57 @@ public class BrokerService {
 
         var matchingSaleOrder = matchingSaleOrders.get(0);
 
-        var transactionId = UUID.randomUUID();
-        var transactionUnitCount = Math.min(matchingSaleOrder.getUnitsCount(), purchaseOrder.getUnitsCount());
-        var transactionPricePerUnit = matchingSaleOrder.getPricePerUnit();
-
-        var transaction = new Transaction(transactionId, purchaseOrder.getId(), matchingSaleOrder.getId(), transactionUnitCount, transactionPricePerUnit, Instant.now());
+        var transaction = createTransactionForMatchingOrders(purchaseOrder, matchingSaleOrder);
 
         transactionRepository.save(transaction);
 
         log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
     }
 
-    private static boolean isMatchForTransaction(PurchaseOrder purchaseOrder, SaleOrder saleOrder) {
-        return saleOrder.getPricePerUnit().compareTo(purchaseOrder.getPricePerUnit()) <= 0 &&
+    public void brokerAvailableTransactionForSaleOrder(UUID saleOrderId) {
+        if (!config.isEnabled()) {
+            return;
+        }
+
+        var saleOrder = saleOrderService.get(saleOrderId);
+
+        if (saleOrder == null || saleOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || !saleOrder.isValid()) {
+            return;
+        }
+
+        var matchingPurchaseOrders = purchaseOrderService.getAllWithTransactions()
+                .stream()
+                .filter(purchaseOrder -> isMatchForTransaction(purchaseOrder, saleOrder))
+                .toList();
+
+        if (matchingPurchaseOrders.size() < 1) {
+            return;
+        }
+
+        var matchingPurchaseOrder = matchingPurchaseOrders.get(0);
+
+        var transaction = createTransactionForMatchingOrders(matchingPurchaseOrder, saleOrder);
+
+        transactionRepository.save(transaction);
+
+        log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
+    }
+
+    private boolean isMatchForTransaction(PurchaseOrder purchaseOrder, SaleOrder saleOrder) {
+        return purchaseOrder.isValid() &&
+                saleOrder.isValid() &&
+                purchaseOrder.getFulfillmentStatus() != FulfillmentStatus.FULFILLED &&
+                saleOrder.getFulfillmentStatus() != FulfillmentStatus.FULFILLED &&
+                purchaseOrder.getPricePerUnit().compareTo(saleOrder.getPricePerUnit()) >= 0 &&
                 saleOrder.getUnitsCount() == purchaseOrder.getUnitsCount();
+    }
+
+    private Transaction createTransactionForMatchingOrders(PurchaseOrder purchaseOrder, SaleOrder saleOrder) {
+        var transactionId = UUID.randomUUID();
+        var transactionUnitCount = Math.min(purchaseOrder.getUnitsCount(), saleOrder.getUnitsCount());
+        var transactionPricePerUnit = purchaseOrder.getPricePerUnit();
+        var transactionDate = Instant.now();
+
+        return new Transaction(transactionId, purchaseOrder.getId(), saleOrder.getId(), transactionUnitCount, transactionPricePerUnit, transactionDate);
     }
 }

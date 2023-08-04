@@ -53,4 +53,8 @@ public class EventStore {
                 .filter(e -> e.getAggregateName().equals(aggregateName))
                 .collect(groupingBy(DomainEvent::getAggregateId));
     }
+
+    public void clear() {
+        events.clear();
+    }
 }

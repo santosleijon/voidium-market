@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
+import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.transactions.TransactionDTO;
 import jakarta.annotation.Nullable;
 
@@ -14,5 +15,6 @@ public record PurchaseOrderDTO(
         BigDecimal pricePerUnit,
         Instant validTo,
         boolean deleted,
+        FulfillmentStatus fulfillmentStatus,
         @Nullable List<TransactionDTO> transactions) {
 }

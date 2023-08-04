@@ -2,6 +2,7 @@ package com.github.santosleijon.voidiummarket.saleorders;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.github.santosleijon.voidiummarket.common.AggregateRoot;
+import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.UnexpectedDomainEvent;
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderDeleted;
@@ -64,6 +65,14 @@ public class SaleOrder extends AggregateRoot {
         return deleted;
     }
 
+    public boolean isValid() {
+        return Instant.now().compareTo(validTo) <= 0;
+    }
+
+    public FulfillmentStatus getFulfillmentStatus() {
+        return FulfillmentStatus.fromOrderTransactions(transactions, unitsCount);
+    }
+
     @Nullable
     public List<Transaction> getTransactions() {
         return transactions;
@@ -113,6 +122,7 @@ public class SaleOrder extends AggregateRoot {
                 this.pricePerUnit,
                 this.validTo,
                 this.deleted,
+                getFulfillmentStatus(),
                 transactionDTOs
         );
     }

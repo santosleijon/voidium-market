@@ -47,6 +47,7 @@ public class PurchaseOrderRepository {
 
         return eventsByPurchaseOrderId.entrySet().stream()
                 .map(purchaseOrderEntry -> new PurchaseOrder(purchaseOrderEntry.getKey(), purchaseOrderEntry.getValue()))
+                .filter(purchaseOrder -> !purchaseOrder.isDeleted())
                 .collect(Collectors.toList());
     }
 

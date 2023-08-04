@@ -1,18 +1,21 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
 import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestPropertySource;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -26,13 +29,20 @@ class PurchaseOrderControllerTest {
     private final PurchaseOrderController purchaseOrderController;
     private final TransactionRepository transactionRepository;
     private final TestHttpClient testHttpClient;
+    private final EventStore eventStore;
 
     @Autowired
-    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient) {
+    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient, EventStore eventStore) {
         this.purchaseOrderService = purchaseOrderService;
         this.purchaseOrderController = purchaseOrderController;
         this.transactionRepository = transactionRepository;
         this.testHttpClient = testHttpClient;
+        this.eventStore = eventStore;
+    }
+
+    @AfterEach
+    void afterEach() {
+        eventStore.clear();
     }
 
     @Test
@@ -50,7 +60,7 @@ class PurchaseOrderControllerTest {
     void getPurchaseOrderShouldReturnCorrectPurchaseOrderWithTransactionInfo() {
         var expectedPurchaseOrderId = UUID.randomUUID();
 
-        var expectedTransaction = new Transaction(UUID.randomUUID(), expectedPurchaseOrderId, UUID.randomUUID(), Instant.now());
+        var expectedTransaction = new Transaction(UUID.randomUUID(), expectedPurchaseOrderId, UUID.randomUUID(), 1, BigDecimal.ONE, Instant.now());
 
         var expectedPurchaseOrder = new PurchaseOrderBuilder()
                 .withId(expectedPurchaseOrderId)

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class PurchaseOrderService {
@@ -27,6 +28,14 @@ public class PurchaseOrderService {
 
     public List<PurchaseOrder> getAll() {
         return purchaseOrderRepository.getAll();
+    }
+
+    public List<PurchaseOrder> getAllWithTransactions() {
+        var purchaseOrders = purchaseOrderRepository.getAll();
+
+        return purchaseOrders.stream()
+                .map(this::getPurchaseOrderWithTransactions)
+                .collect(Collectors.toList());
     }
 
     @Nullable
@@ -67,5 +76,11 @@ public class PurchaseOrderService {
         }
 
         log.info("PurchaseOrder\t{}: Delete order of {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
+    }
+
+    private PurchaseOrder getPurchaseOrderWithTransactions(PurchaseOrder purchaseOrder) {
+        var transactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+
+        return purchaseOrder.setTransactions(transactions);
     }
 }
