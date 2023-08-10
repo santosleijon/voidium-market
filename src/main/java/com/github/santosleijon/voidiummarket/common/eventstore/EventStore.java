@@ -25,7 +25,7 @@ public class EventStore {
 
     public void publish(DomainEvent event) {
         var existingEventWithSameID = events.stream()
-                .filter(e -> e.getId() == event.getId())
+                .filter(e -> e.getId().equals(event.getId()))
                 .findFirst()
                 .orElse(null);
 
