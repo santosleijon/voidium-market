@@ -33,7 +33,7 @@ public class BrokerService {
         this.saleOrderService = saleOrderService;
     }
 
-    public void brokerAvailableTransactionForPurchaseOrder(UUID purchaseOrderId) {
+    public synchronized void brokerAvailableTransactionForPurchaseOrder(UUID purchaseOrderId) {
         if (!config.isEnabled()) {
             return;
         }
@@ -62,7 +62,7 @@ public class BrokerService {
         log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
     }
 
-    public void brokerAvailableTransactionForSaleOrder(UUID saleOrderId) {
+    public synchronized void brokerAvailableTransactionForSaleOrder(UUID saleOrderId) {
         if (!config.isEnabled()) {
             return;
         }

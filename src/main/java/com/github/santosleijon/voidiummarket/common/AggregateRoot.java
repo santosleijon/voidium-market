@@ -13,12 +13,15 @@ public abstract class AggregateRoot {
 
     protected UUID id;
 
+    protected int currentVersion;
+
     @JsonIgnore
     private final List<DomainEvent> pendingEvents = new ArrayList<>();
 
-    public AggregateRoot(String name, UUID id) {
+    public AggregateRoot(String name, UUID id, int currentVersion) {
         this.name = name;
         this.id = id;
+        this.currentVersion = currentVersion;
     }
 
     public String getName() {
@@ -29,9 +32,14 @@ public abstract class AggregateRoot {
         return id;
     }
 
+    public int getCurrentVersion() {
+        return currentVersion;
+    }
+
     public void apply(DomainEvent event) {
         pendingEvents.add(event);
         mutate(event);
+        currentVersion++;
     }
 
     public abstract void mutate(DomainEvent event);

@@ -34,14 +34,14 @@ public class SaleOrder extends AggregateRoot {
 
     @JsonCreator
     public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
-        super(aggregateName, id);
+        super(aggregateName, id, 1);
 
         var initEvent = new SaleOrderPlaced(id, placedDate, id, unitsCount, pricePerUnit.setScale(2, RoundingMode.HALF_UP), validTo);
         this.apply(initEvent);
     }
 
     public SaleOrder(UUID id, List<DomainEvent> events) {
-        super(aggregateName, id);
+        super(aggregateName, id, events.size());
         events.forEach(this::mutate);
     }
 

@@ -53,7 +53,7 @@ public class PurchaseOrderRepository {
 
     public void save(PurchaseOrder purchaseOrder) {
         for (var event : purchaseOrder.getPendingEvents()) {
-            eventStore.publish(event);
+            eventStore.publish(event, purchaseOrder.getCurrentVersion());
         }
     }
 }

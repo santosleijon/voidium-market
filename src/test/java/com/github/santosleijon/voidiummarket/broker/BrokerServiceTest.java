@@ -6,18 +6,24 @@ import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderBuilder;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import com.github.santosleijon.voidiummarket.transactions.TransactionService;
-import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
+@DirtiesContext
+@EmbeddedKafka(partitions = 1)
 class BrokerServiceTest {
 
     private final BrokerConfig brokerConfig;
@@ -58,7 +64,7 @@ class BrokerServiceTest {
 
         var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        Awaitility.await().untilAsserted(() -> assertThat(actualCreatedTransactions.size()).isEqualTo(0));
     }
 
     @Test
@@ -79,6 +85,13 @@ class BrokerServiceTest {
 
         saleOrderService.place(matchingSaleOrder);
 
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+
+            assertThat(actualCreatedTransactions.size()).isEqualTo(1);
+            assertThat(actualCreatedTransactions.get(0).getSaleOrderId()).isEqualTo(matchingSaleOrder.getId());
+        });
+
         var unfulfilledSaleOrder = new SaleOrderBuilder()
                 .withUnitsCount(purchaseOrder.getUnitsCount())
                 .withPricePerUnit(purchaseOrder.getPricePerUnit())
@@ -86,14 +99,11 @@ class BrokerServiceTest {
 
         saleOrderService.place(unfulfilledSaleOrder);
 
-        var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+        Awaitility.await().untilAsserted(() -> {
+            var transactionsForUnfulfilledSaleOrder = transactionService.getForSaleOrder(unfulfilledSaleOrder.getId());
 
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(1);
-        Assertions.assertThat(actualCreatedTransactions.get(0).getSaleOrderId()).isEqualTo(matchingSaleOrder.getId());
-
-        var transactionsForUnfulfilledSaleOrder = transactionService.getForSaleOrder(unfulfilledSaleOrder.getId());
-
-        Assertions.assertThat(transactionsForUnfulfilledSaleOrder.size()).isEqualTo(0);
+            assertThat(transactionsForUnfulfilledSaleOrder.size()).isEqualTo(0);
+        });
     }
 
     @Test
@@ -114,6 +124,13 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(matchingPurchaseOrder);
 
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForSaleOrder(saleOrder.getId());
+
+            assertThat(actualCreatedTransactions.size()).isEqualTo(1);
+            assertThat(actualCreatedTransactions.get(0).getPurchaseOrderId()).isEqualTo(matchingPurchaseOrder.getId());
+        });
+
         var unfulfilledPurchaseOrder = new PurchaseOrderBuilder()
                 .withUnitsCount(saleOrder.getUnitsCount())
                 .withPricePerUnit(saleOrder.getPricePerUnit())
@@ -121,14 +138,11 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(unfulfilledPurchaseOrder);
 
-        var actualCreatedTransactions = transactionService.getForSaleOrder(saleOrder.getId());
+        Awaitility.await().untilAsserted(() -> {
+            var transactionsForUnfulfilledSaleOrder = transactionService.getForPurchaseOrder(unfulfilledPurchaseOrder.getId());
 
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(1);
-        Assertions.assertThat(actualCreatedTransactions.get(0).getPurchaseOrderId()).isEqualTo(matchingPurchaseOrder.getId());
-
-        var transactionsForUnfulfilledSaleOrder = transactionService.getForSaleOrder(unfulfilledPurchaseOrder.getId());
-
-        Assertions.assertThat(transactionsForUnfulfilledSaleOrder.size()).isEqualTo(0);
+            assertThat(transactionsForUnfulfilledSaleOrder.size()).isEqualTo(0);
+        });
     }
 
     @Test
@@ -149,16 +163,18 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(purchaseOrder);
 
-        var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(1);
+            assertThat(actualCreatedTransactions.size()).isEqualTo(1);
 
-        var actualCreatedTransaction = actualCreatedTransactions.get(0);
+            var actualCreatedTransaction = actualCreatedTransactions.get(0);
 
-        Assertions.assertThat(actualCreatedTransaction.getPurchaseOrderId()).isEqualTo(purchaseOrder.getId());
-        Assertions.assertThat(actualCreatedTransaction.getSaleOrderId()).isEqualTo(saleOrder.getId());
-        Assertions.assertThat(actualCreatedTransaction.getPricePerUnit()).isEqualTo(saleOrder.getPricePerUnit()).isEqualTo(purchaseOrder.getPricePerUnit());
-        Assertions.assertThat(actualCreatedTransaction.getUnitsCount()).isEqualTo(saleOrder.getUnitsCount()).isEqualTo(purchaseOrder.getUnitsCount());
+            assertThat(actualCreatedTransaction.getPurchaseOrderId()).isEqualTo(purchaseOrder.getId());
+            assertThat(actualCreatedTransaction.getSaleOrderId()).isEqualTo(saleOrder.getId());
+            assertThat(actualCreatedTransaction.getPricePerUnit()).isEqualTo(saleOrder.getPricePerUnit()).isEqualTo(purchaseOrder.getPricePerUnit());
+            assertThat(actualCreatedTransaction.getUnitsCount()).isEqualTo(saleOrder.getUnitsCount()).isEqualTo(purchaseOrder.getUnitsCount());
+        });
     }
 
     @Test
@@ -179,16 +195,18 @@ class BrokerServiceTest {
 
         saleOrderService.place(saleOrder);
 
-        var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(1);
+            assertThat(actualCreatedTransactions.size()).isEqualTo(1);
 
-        var actualCreatedTransaction = actualCreatedTransactions.get(0);
+            var actualCreatedTransaction = actualCreatedTransactions.get(0);
 
-        Assertions.assertThat(actualCreatedTransaction.getPurchaseOrderId()).isEqualTo(purchaseOrder.getId());
-        Assertions.assertThat(actualCreatedTransaction.getSaleOrderId()).isEqualTo(saleOrder.getId());
-        Assertions.assertThat(actualCreatedTransaction.getPricePerUnit()).isEqualTo(saleOrder.getPricePerUnit()).isEqualTo(purchaseOrder.getPricePerUnit());
-        Assertions.assertThat(actualCreatedTransaction.getUnitsCount()).isEqualTo(saleOrder.getUnitsCount()).isEqualTo(purchaseOrder.getUnitsCount());
+            assertThat(actualCreatedTransaction.getPurchaseOrderId()).isEqualTo(purchaseOrder.getId());
+            assertThat(actualCreatedTransaction.getSaleOrderId()).isEqualTo(saleOrder.getId());
+            assertThat(actualCreatedTransaction.getPricePerUnit()).isEqualTo(saleOrder.getPricePerUnit()).isEqualTo(purchaseOrder.getPricePerUnit());
+            assertThat(actualCreatedTransaction.getUnitsCount()).isEqualTo(saleOrder.getUnitsCount()).isEqualTo(purchaseOrder.getUnitsCount());
+        });
     }
 
     @Test
@@ -207,9 +225,10 @@ class BrokerServiceTest {
 
         saleOrderService.place(saleOrder);
 
-        var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
-
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
+            assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        });
     }
 
     @Test
@@ -226,9 +245,10 @@ class BrokerServiceTest {
 
         saleOrderService.place(validSaleOrder);
 
-        var actualCreatedTransactions = transactionService.getForPurchaseOrder(expiredPurchaseOrder.getId());
-
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForPurchaseOrder(expiredPurchaseOrder.getId());
+            assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        });
     }
 
     @Test
@@ -245,8 +265,9 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(validPurchaseOrder);
 
-        var actualCreatedTransactions = transactionService.getForSaleOrder(expiredSaleOrder.getId());
-
-        Assertions.assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        Awaitility.await().untilAsserted(() -> {
+            var actualCreatedTransactions = transactionService.getForSaleOrder(expiredSaleOrder.getId());
+            assertThat(actualCreatedTransactions.size()).isEqualTo(0);
+        });
     }
 }

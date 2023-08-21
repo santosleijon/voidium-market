@@ -22,14 +22,14 @@ public class Transaction extends AggregateRoot {
 
     @JsonCreator
     public Transaction(UUID id, UUID purchaseOrderId, UUID saleOrderId, int unitsCount, BigDecimal pricePerUnit, Instant date) {
-        super(aggregateName, id);
+        super(aggregateName, id, 0);
 
         var initEvent = new TransactionCompleted(id, purchaseOrderId, saleOrderId, unitsCount, pricePerUnit, date);
         this.apply(initEvent);
     }
 
     public Transaction(UUID id, List<DomainEvent> events) {
-        super(aggregateName, id);
+        super(aggregateName, id, events.size());
         events.forEach(this::mutate);
     }
 

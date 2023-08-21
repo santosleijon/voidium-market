@@ -1,25 +1,35 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
+import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
+@EmbeddedKafka(partitions = 1)
 class SellerSimulatorTest {
 
-    private final SimulatorConfig simulatorConfig;
+    private final SimulatorConfig simulatorConfig = new SimulatorConfig();
     private final RandomUtil randomUtil;
     private final SaleOrderService saleOrderService;
+    private final EventStore eventStore;
 
     @Autowired
-    public SellerSimulatorTest(SimulatorConfig simulatorConfig, RandomUtil randomUtil, SaleOrderService saleOrderService) {
-        this.simulatorConfig = simulatorConfig;
+    public SellerSimulatorTest(RandomUtil randomUtil, SaleOrderService saleOrderService, EventStore eventStore) {
         this.randomUtil = randomUtil;
         this.saleOrderService = saleOrderService;
+        this.eventStore = eventStore;
+    }
+
+    @AfterEach
+    void afterEach() {
+        eventStore.clear();
     }
 
     @Test

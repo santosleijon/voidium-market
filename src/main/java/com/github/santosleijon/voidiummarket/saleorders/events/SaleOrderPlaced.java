@@ -1,5 +1,7 @@
 package com.github.santosleijon.voidiummarket.saleorders.events;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
 
@@ -15,7 +17,13 @@ public class SaleOrderPlaced extends DomainEvent {
     private final BigDecimal pricePerUnit;
     private final Instant validTo;
 
-    public SaleOrderPlaced(UUID id, Instant date, UUID aggregateId, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
+    @JsonCreator
+    public SaleOrderPlaced(@JsonProperty("id") UUID id,
+                           @JsonProperty("date") Instant date,
+                           @JsonProperty("aggregateId") UUID aggregateId,
+                           @JsonProperty("unitsCount") int unitsCount,
+                           @JsonProperty("pricePerUnit") BigDecimal pricePerUnit,
+                           @JsonProperty("validTo") Instant validTo) {
         super(id, date, type, SaleOrder.aggregateName, aggregateId);
         this.unitsCount = unitsCount;
         this.pricePerUnit = pricePerUnit;

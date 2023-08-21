@@ -35,14 +35,14 @@ public class PurchaseOrder extends AggregateRoot {
 
     @JsonCreator
     public PurchaseOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
-        super(aggregateName, id);
+        super(aggregateName, id, 1);
 
         var initEvent = new PurchaseOrderPlaced(id, placedDate, id, unitsCount, pricePerUnit.setScale(2, RoundingMode.HALF_UP), validTo);
         this.apply(initEvent);
     }
 
     public PurchaseOrder(UUID id, List<DomainEvent> events) {
-        super(aggregateName, id);
+        super(aggregateName, id, events.size());
         events.forEach(this::mutate);
     }
 
