@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.groupingBy;
 @Component
 public class EventStore {
 
-    // TODO: Replace in-memory list with Kafka
+    // TODO: Replace in-memory list with PostgreSQL table
     private final List<DomainEvent> events = Collections.synchronizedList(new ArrayList<>());
 
     private final EventPublisher eventPublisher;
