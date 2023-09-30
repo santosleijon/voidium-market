@@ -16,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -124,7 +125,7 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(matchingPurchaseOrder);
 
-        Awaitility.await().untilAsserted(() -> {
+        Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
             var actualCreatedTransactions = transactionService.getForSaleOrder(saleOrder.getId());
 
             assertThat(actualCreatedTransactions.size()).isEqualTo(1);

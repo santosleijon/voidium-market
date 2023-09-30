@@ -19,10 +19,13 @@ public class EventStore {
     // TODO: Replace in-memory list with PostgreSQL table
     private final List<DomainEvent> events = Collections.synchronizedList(new ArrayList<>());
 
+    private final EventStoreDAO eventStoreDAO;
+
     private final EventPublisher eventPublisher;
 
     @Autowired
-    public EventStore(EventPublisher eventPublisher) {
+    public EventStore(EventStoreDAO eventStoreDAO, EventPublisher eventPublisher) {
+        this.eventStoreDAO = eventStoreDAO;
         this.eventPublisher = eventPublisher;
     }
 
@@ -45,12 +48,13 @@ public class EventStore {
         }
 
         try {
-            eventPublisher.publish(event);
+            eventPublisher.publish(event); // TODO: Let DB insert of event trigger the publishing to Kafka?
+            eventStoreDAO.insert(event);
+
+            events.add(event); // TODO: Remove
         } catch (JsonProcessingException e) {
             throw new DomainEventFailedToPublish(event, e);
         }
-
-        events.add(event);
     }
 
     public List<DomainEvent> getEvents() {
