@@ -9,15 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
 @Component
 public class EventStore {
-
-    // TODO: Replace in-memory list with PostgreSQL table
-    private final List<DomainEvent> events = Collections.synchronizedList(new ArrayList<>());
 
     private final EventStoreDAO eventStoreDAO;
 
@@ -30,10 +26,7 @@ public class EventStore {
     }
 
     public void publish(DomainEvent event, int newAggregateVersion) {
-        var existingEventWithSameID = events.stream()
-                .filter(e -> e.getId().equals(event.getId()))
-                .findFirst()
-                .orElse(null);
+        var existingEventWithSameID = eventStoreDAO.getByEventId(event.getId());
 
         if (existingEventWithSameID != null) {
             throw new DomainEventAlreadyPublished(event);
@@ -50,30 +43,22 @@ public class EventStore {
         try {
             eventPublisher.publish(event); // TODO: Let DB insert of event trigger the publishing to Kafka?
             eventStoreDAO.insert(event);
-
-            events.add(event); // TODO: Remove
         } catch (JsonProcessingException e) {
             throw new DomainEventFailedToPublish(event, e);
         }
     }
 
-    public List<DomainEvent> getEvents() {
-        return Collections.unmodifiableList((events));
-    }
-
     public List<DomainEvent> getEventsByAggregateIdAndName(UUID aggregateId, String aggregateName) {
-        return events.stream()
-                .filter(e -> e.getAggregateId().equals(aggregateId) && e.getAggregateName().equals(aggregateName))
-                .collect(Collectors.toList());
+        return eventStoreDAO.getByAggregateIdAndName(aggregateId, aggregateName);
     }
 
     public Map<UUID, List<DomainEvent>> getEventsByAggregateName(String aggregateName) {
-        return events.stream()
-                .filter(e -> e.getAggregateName().equals(aggregateName))
+        return eventStoreDAO.getByAggregateName(aggregateName)
+                .stream()
                 .collect(groupingBy(DomainEvent::getAggregateId));
     }
 
     public void clear() {
-        events.clear();
+        eventStoreDAO.deleteAll();
     }
 }

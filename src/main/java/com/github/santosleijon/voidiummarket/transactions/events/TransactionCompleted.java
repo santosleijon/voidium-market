@@ -1,5 +1,8 @@
 package com.github.santosleijon.voidiummarket.transactions.events;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 
@@ -8,6 +11,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.UUID;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public class TransactionCompleted extends DomainEvent {
 
     private final UUID purchaseOrderId;
@@ -15,7 +19,15 @@ public class TransactionCompleted extends DomainEvent {
     private final int unitsCount;
     private final BigDecimal pricePerUnit;
 
-    public TransactionCompleted(UUID id, UUID purchaseOrderId, UUID saleOrderId, int unitsCount, BigDecimal pricePerUnit, Instant date) {
+    @JsonCreator
+    public TransactionCompleted(
+            @JsonProperty("id") UUID id,
+            @JsonProperty("purchaseOrderId") UUID purchaseOrderId,
+            @JsonProperty("saleOrderId") UUID saleOrderId,
+            @JsonProperty("unitsCount") int unitsCount,
+            @JsonProperty("pricePerUnit") BigDecimal pricePerUnit,
+            @JsonProperty("date") Instant date
+    ) {
         super(id, date, "TransactionCompleted", Transaction.aggregateName, id);
 
         this.purchaseOrderId = purchaseOrderId;

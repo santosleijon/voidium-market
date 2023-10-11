@@ -1,10 +1,15 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
 
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.CLASS,
+        property = "@class"
+)
 public class DomainEvent {
 
     private final UUID id;

@@ -2,8 +2,10 @@ package com.github.santosleijon.voidiummarket.broker;
 
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderBuilder;
+import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderRepository;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderBuilder;
+import com.github.santosleijon.voidiummarket.saleorders.SaleOrderRepository;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import org.awaitility.Awaitility;
@@ -32,14 +34,20 @@ class BrokerServiceTest {
     private final SaleOrderService saleOrderService;
     private final TransactionService transactionService;
     private final EventStore eventStore;
+    private final BrokerService brokerService;
+    private final SaleOrderRepository saleOrderRepository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
 
     @Autowired
-    public BrokerServiceTest(BrokerConfig brokerConfig, PurchaseOrderService purchaseOrderService, SaleOrderService saleOrderService, TransactionService transactionService, EventStore eventStore) {
+    public BrokerServiceTest(BrokerConfig brokerConfig, PurchaseOrderService purchaseOrderService, SaleOrderService saleOrderService, TransactionService transactionService, EventStore eventStore, BrokerService brokerService, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository) {
         this.brokerConfig = brokerConfig;
         this.purchaseOrderService = purchaseOrderService;
         this.saleOrderService = saleOrderService;
         this.transactionService = transactionService;
         this.eventStore = eventStore;
+        this.brokerService = brokerService;
+        this.saleOrderRepository = saleOrderRepository;
+        this.purchaseOrderRepository = purchaseOrderRepository;
     }
 
     @AfterEach
@@ -77,21 +85,16 @@ class BrokerServiceTest {
                 .withUnitsCount(10)
                 .build();
 
-        purchaseOrderService.place(purchaseOrder);
+        purchaseOrderRepository.save(purchaseOrder);
 
         var matchingSaleOrder = new SaleOrderBuilder()
                 .withUnitsCount(purchaseOrder.getUnitsCount())
                 .withPricePerUnit(purchaseOrder.getPricePerUnit())
                 .build();
 
-        saleOrderService.place(matchingSaleOrder);
+        saleOrderRepository.save(matchingSaleOrder);
 
-        Awaitility.await().untilAsserted(() -> {
-            var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
-
-            assertThat(actualCreatedTransactions.size()).isEqualTo(1);
-            assertThat(actualCreatedTransactions.get(0).getSaleOrderId()).isEqualTo(matchingSaleOrder.getId());
-        });
+        brokerService.brokerAvailableTransactionForSaleOrder(matchingSaleOrder.getId());
 
         var unfulfilledSaleOrder = new SaleOrderBuilder()
                 .withUnitsCount(purchaseOrder.getUnitsCount())
@@ -116,21 +119,16 @@ class BrokerServiceTest {
                 .withUnitsCount(10)
                 .build();
 
-        saleOrderService.place(saleOrder);
+        saleOrderRepository.save(saleOrder);
 
         var matchingPurchaseOrder = new PurchaseOrderBuilder()
                 .withUnitsCount(saleOrder.getUnitsCount())
                 .withPricePerUnit(saleOrder.getPricePerUnit())
                 .build();
 
-        purchaseOrderService.place(matchingPurchaseOrder);
+        purchaseOrderRepository.save(matchingPurchaseOrder);
 
-        Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
-            var actualCreatedTransactions = transactionService.getForSaleOrder(saleOrder.getId());
-
-            assertThat(actualCreatedTransactions.size()).isEqualTo(1);
-            assertThat(actualCreatedTransactions.get(0).getPurchaseOrderId()).isEqualTo(matchingPurchaseOrder.getId());
-        });
+        brokerService.brokerAvailableTransactionForSaleOrder(saleOrder.getId());
 
         var unfulfilledPurchaseOrder = new PurchaseOrderBuilder()
                 .withUnitsCount(saleOrder.getUnitsCount())
@@ -164,7 +162,7 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(purchaseOrder);
 
-        Awaitility.await().untilAsserted(() -> {
+        Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
             var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
             assertThat(actualCreatedTransactions.size()).isEqualTo(1);

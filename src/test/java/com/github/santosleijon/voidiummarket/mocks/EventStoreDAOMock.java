@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class EventStoreDAOMock implements EventStoreDAO {
@@ -16,6 +18,28 @@ public class EventStoreDAOMock implements EventStoreDAO {
     @Override
     public void insert(DomainEvent event) {
         events.add(event);
+    }
+
+    @Override
+    public DomainEvent getByEventId(UUID eventId) {
+        return events.stream()
+                .filter(e -> e.getId().equals(eventId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public List<DomainEvent> getByAggregateName(String aggregateName) {
+        return events.stream()
+                .filter(e -> e.getAggregateName().equals(aggregateName))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DomainEvent> getByAggregateIdAndName(UUID aggregateId, String aggregateName) {
+        return events.stream()
+                .filter(e -> e.getAggregateId().equals(aggregateId) && e.getAggregateName().equals(aggregateName))
+                .collect(Collectors.toList());
     }
 
     @Override

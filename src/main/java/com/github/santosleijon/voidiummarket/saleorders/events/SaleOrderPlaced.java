@@ -2,6 +2,7 @@ package com.github.santosleijon.voidiummarket.saleorders.events;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
 
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public class SaleOrderPlaced extends DomainEvent {
 
     public final static String type = "SaleOrderPlaced";

@@ -1,6 +1,8 @@
 package com.github.santosleijon.voidiummarket.purchaseorders.events;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
 
@@ -8,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public class PurchaseOrderPlaced extends DomainEvent {
 
     public static final String type = "PurchaseOrderPlaced";
@@ -16,6 +19,7 @@ public class PurchaseOrderPlaced extends DomainEvent {
     private final BigDecimal pricePerUnit;
     private final Instant validTo;
 
+    @JsonCreator
     public PurchaseOrderPlaced(@JsonProperty("id") UUID id,
                                @JsonProperty("date") Instant date,
                                @JsonProperty("aggregateId") UUID aggregateId,
