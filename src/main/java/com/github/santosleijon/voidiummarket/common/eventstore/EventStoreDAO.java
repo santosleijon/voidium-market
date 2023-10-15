@@ -8,5 +8,7 @@ public interface EventStoreDAO {
     DomainEvent getByEventId(UUID eventId);
     List<DomainEvent> getByAggregateName(String aggregateName);
     List<DomainEvent> getByAggregateIdAndName(UUID aggregateId, String aggregateName);
+    List<DomainEvent> getUnpublishedEvents();
+    void markEventAsPublished(UUID eventId);
     void deleteAll();
 }

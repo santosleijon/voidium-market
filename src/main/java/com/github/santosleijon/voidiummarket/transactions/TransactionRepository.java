@@ -30,12 +30,6 @@ public class TransactionRepository {
         return new Transaction(id, events);
     }
 
-    public boolean exists(UUID id) {
-        var events = eventStore.getEventsByAggregateIdAndName(id, Transaction.aggregateName);
-
-        return events.size() > 0;
-    }
-
     public List<Transaction> getAll() {
         var eventsByTransactionId = eventStore.getEventsByAggregateName(Transaction.aggregateName);
 
@@ -64,7 +58,7 @@ public class TransactionRepository {
 
     public void save(Transaction transaction) {
         for (var event : transaction.getPendingEvents()) {
-            eventStore.publish(event, transaction.getCurrentVersion());
+            eventStore.append(event, transaction.getCurrentVersion());
         }
     }
 }

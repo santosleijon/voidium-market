@@ -24,12 +24,20 @@ public class DomainEvent {
     @Nullable
     private final UUID aggregateId;
 
-    public DomainEvent(UUID id, Instant date, String type, @Nullable String aggregateName, @Nullable UUID aggregateId) {
+    @Nullable
+    private Instant published;
+
+    public DomainEvent(UUID id, Instant date, String type, @Nullable String aggregateName, @Nullable UUID aggregateId, @Nullable Instant published) {
         this.id = id;
-        this.type = type;
         this.date = date;
+        this.type = type;
         this.aggregateName = aggregateName;
         this.aggregateId = aggregateId;
+        this.published = published;
+    }
+
+    public DomainEvent(UUID id, Instant date, String type, @Nullable String aggregateName, @Nullable UUID aggregateId) {
+        this(id, date, type, aggregateName, aggregateId, null);
     }
 
     public UUID getId() {
@@ -52,5 +60,14 @@ public class DomainEvent {
     @Nullable
     public UUID getAggregateId() {
         return aggregateId;
+    }
+
+    @Nullable
+    public Instant getPublished() {
+        return published;
+    }
+
+    public void markAsPublished() {
+        this.published = Instant.now();
     }
 }

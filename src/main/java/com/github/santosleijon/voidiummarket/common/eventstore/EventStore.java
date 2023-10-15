@@ -1,14 +1,13 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.AggregateVersionIsOutOfDate;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.DomainEventAlreadyPublished;
-import com.github.santosleijon.voidiummarket.common.eventstore.errors.DomainEventFailedToPublish;
-import com.github.santosleijon.voidiummarket.common.eventstreaming.EventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -17,15 +16,12 @@ public class EventStore {
 
     private final EventStoreDAO eventStoreDAO;
 
-    private final EventPublisher eventPublisher;
-
     @Autowired
-    public EventStore(EventStoreDAO eventStoreDAO, EventPublisher eventPublisher) {
+    public EventStore(EventStoreDAO eventStoreDAO) {
         this.eventStoreDAO = eventStoreDAO;
-        this.eventPublisher = eventPublisher;
     }
 
-    public void publish(DomainEvent event, int newAggregateVersion) {
+    public void append(DomainEvent event, int newAggregateVersion) {
         var existingEventWithSameID = eventStoreDAO.getByEventId(event.getId());
 
         if (existingEventWithSameID != null) {
@@ -40,12 +36,7 @@ public class EventStore {
             throw new AggregateVersionIsOutOfDate(event, newAggregateVersion);
         }
 
-        try {
-            eventPublisher.publish(event); // TODO: Let DB insert of event trigger the publishing to Kafka?
-            eventStoreDAO.insert(event);
-        } catch (JsonProcessingException e) {
-            throw new DomainEventFailedToPublish(event, e);
-        }
+        eventStoreDAO.insert(event);
     }
 
     public List<DomainEvent> getEventsByAggregateIdAndName(UUID aggregateId, String aggregateName) {

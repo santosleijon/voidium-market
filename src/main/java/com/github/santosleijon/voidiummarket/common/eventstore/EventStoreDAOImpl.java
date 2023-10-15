@@ -115,9 +115,49 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                             WHERE
                                 aggregate_id = :aggregate_id AND
                                 aggregate_name = :aggregate_name
+                            ORDER BY
+                                event_date
                 """.trim(), paramMap, new DomainEventRowMapper());
     }
 
+    @Override
+    public List<DomainEvent> getUnpublishedEvents() {
+        return jdbcTemplate.query("""
+                            SELECT
+                                data
+                            FROM
+                                event_store
+                            WHERE
+                                published IS NULL
+                            ORDER BY
+                                event_date
+                            LIMIT
+                                100
+                """.trim(), new DomainEventRowMapper());
+    }
+
+    @Override
+    public void markEventAsPublished(UUID eventId) {
+        try {
+            Map<String, Object> paramMap = Map.of(
+                    "event_id", eventId,
+                    "published_date", getZuluLocalDateTime(Instant.now())
+            );
+
+            jdbcTemplate.update("""
+                        UPDATE
+                            event_store
+                        SET
+                           published = :published_date
+                        WHERE
+                            event_id = :event_id
+                    """.trim(), paramMap);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void deleteAll() {
         jdbcTemplate.update("""
                     DELETE FROM event_store

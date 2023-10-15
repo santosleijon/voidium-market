@@ -43,6 +43,28 @@ public class EventStoreDAOMock implements EventStoreDAO {
     }
 
     @Override
+    public List<DomainEvent> getUnpublishedEvents() {
+        return events.stream()
+                .filter(e -> e.getPublished() == null)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void markEventAsPublished(UUID eventId) {
+        var optionalEvent = events.stream()
+                .filter(e -> e.getId().equals(eventId))
+                .findFirst();
+
+        if (optionalEvent.isEmpty()) {
+            return;
+        }
+
+        var event = optionalEvent.get();
+
+        event.markAsPublished();
+    }
+
+    @Override
     public void deleteAll() {
         events.clear();
     }

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
+import com.github.santosleijon.voidiummarket.common.eventstore.EventStoreDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -16,14 +18,31 @@ public class EventPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    private final EventStoreDAO eventStoreDAO;
+
     private static final Logger log = LoggerFactory.getLogger(EventPublisher.class);
 
     @Autowired
-    public EventPublisher(KafkaTemplate<String, String> kafkaTemplate) {
+    public EventPublisher(EventStoreDAO eventStoreDAO, KafkaTemplate<String, String> kafkaTemplate) {
+        this.eventStoreDAO = eventStoreDAO;
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void publish(DomainEvent event) throws JsonProcessingException {
+    @Scheduled(fixedRate = 1000)
+    public void publishNewEvents() {
+        var newEvents = eventStoreDAO.getUnpublishedEvents();
+
+        newEvents.forEach(event -> {
+            try {
+                publishEvent(event);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    private void publishEvent(DomainEvent event) throws JsonProcessingException {
         var topic = event.getAggregateName();
         var message = objectMapper.writeValueAsString(event);
 
@@ -33,6 +52,8 @@ public class EventPublisher {
 
         sendResultFuture.whenComplete((result, ex) -> {
             if (ex == null) {
+                eventStoreDAO.markEventAsPublished(event.getId());
+
                 log.info("Successfully published " + event.getClass().getSimpleName() + " event" +
                         " with ID " + event.getId() +
                         " as message=[" + message +"]" +
