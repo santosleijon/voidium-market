@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Voidium Market Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+
+    <style>
+        header h1 {
+            margin: 1rem;
+        }
+
+        #transactions-table {
+            width: 100%;
+        }
+
+        .inner-box {
+            padding: 1rem;
+        }
+    }
+    </style>
+</head>
+<body>
+<header class="pure-u-24-24">
+    <h1>Voidium Market Dashboard</h1>
+</header>
+<section class="pure-u-24-24">
+    <div class="inner-box">
+        <h2>Transactions (<span th:text="${transactions.size}"></span>)</h2>
+        <table class="pure-table" id="transactions-table">
+            <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Date</th>
+                <th>Units count</th>
+                <th>Price per unit</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="transaction: ${transactions}">
+                <td th:text="${transaction.id}" />
+                <td th:text="${transaction.formattedDate}" />
+                <td th:text="${transaction.unitsCount}" />
+                <td th:text="${transaction.pricePerUnit}" />
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<!--TODO:
+<div class="pure-g">
+    <section class="pure-u-12-24">
+        <h2>Sale Orders</h2>
+    </section>
+    <section class="pure-u-12-24">
+        <h2>Purchase Orders</h2>
+    </section>
+</div>
+-->
+</body>
+</html>

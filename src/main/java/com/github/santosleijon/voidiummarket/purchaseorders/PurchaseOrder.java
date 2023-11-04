@@ -97,7 +97,7 @@ public class PurchaseOrder extends AggregateRoot {
 
         if (transactions != null) {
             transactionDTOs = transactions.stream()
-                    .map(t -> new TransactionDTO(t.getId(), t.getPurchaseOrderId(), t.getSaleOrderId(), t.getUnitsCount(), t.getPricePerUnit()))
+                    .map(Transaction::toDTO)
                     .collect(Collectors.toList());
         }
 

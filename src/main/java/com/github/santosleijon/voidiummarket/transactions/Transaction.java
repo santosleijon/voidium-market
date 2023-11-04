@@ -66,4 +66,8 @@ public class Transaction extends AggregateRoot {
             throw new UnexpectedDomainEvent(event);
         }
     }
+
+    public TransactionDTO toDTO() {
+        return new TransactionDTO(getId(), getPurchaseOrderId(), getSaleOrderId(), getDate(), getUnitsCount(), getPricePerUnit());
+    }
 }

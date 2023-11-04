@@ -97,6 +97,8 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                                 event_store
                             WHERE
                                 aggregate_name = :aggregate_name
+                            ORDER BY
+                                event_date
                 """.trim(), paramMap, new DomainEventRowMapper());
     }
 
@@ -131,8 +133,6 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                                 published IS NULL
                             ORDER BY
                                 event_date
-                            LIMIT
-                                100
                 """.trim(), new DomainEventRowMapper());
     }
 
