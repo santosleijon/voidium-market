@@ -1,23 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Voidium Market Dashboard</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
-
-    <style>
-        .inner-box {
-            padding: 1rem;
-        }
-    }
-    </style>
-</head>
+<head th:replace="layout :: head"></head>
 <body>
-<header class="pure-u-24-24">
-    <h1 style="margin: 1rem;">Voidium Market Dashboard</h1>
-</header>
+<header th:replace="layout :: header"></header>
 <section class="pure-u-24-24">
-    <div class="inner-box">
+    <div style="padding: 1rem;">
         <h2>Event Store (<span th:text="${eventsCount}"></span> events)</h2>
         <table class="pure-table" style="width: 100%;">
             <thead>
@@ -52,5 +39,6 @@
         </div>
     </div>
 </section>
+<footer th:replace="layout :: footer"></footer>
 </body>
 </html>

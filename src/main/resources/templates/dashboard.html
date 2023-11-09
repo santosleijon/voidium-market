@@ -1,33 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Voidium Market Dashboard</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
-
-    <style>
-        header h1 {
-            margin: 1rem;
-        }
-
-        #transactions-table {
-            width: 100%;
-        }
-
-        .inner-box {
-            padding: 1rem;
-        }
-    }
-    </style>
-</head>
+<head th:replace="layout :: head"></head>
 <body>
-<header class="pure-u-24-24">
-    <h1>Voidium Market Dashboard</h1>
-</header>
+<header th:replace="layout :: header"></header>
 <section class="pure-u-24-24">
-    <div class="inner-box">
+    <div style="padding: 1rem;">
         <h2>Transactions (<span th:text="${transactions.size}"></span>)</h2>
-        <table class="pure-table" id="transactions-table">
+        <table class="pure-table" id="transactions-table" style="width: 100%;">
             <thead>
             <tr>
                 <th>Transaction ID</th>
@@ -57,5 +36,6 @@
     </section>
 </div>
 -->
+<footer th:replace="layout :: footer"></footer>
 </body>
 </html>
