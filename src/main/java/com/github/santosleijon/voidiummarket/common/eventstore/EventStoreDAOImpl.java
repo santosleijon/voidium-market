@@ -137,6 +137,41 @@ public class EventStoreDAOImpl implements EventStoreDAO {
     }
 
     @Override
+    public List<DomainEventWithData> getPaginatedEventsWithData(int page, int eventsPerPage) {
+        Map<String, Object> paramMap = Map.of(
+                "limit", eventsPerPage,
+                "offset", (page - 1) * eventsPerPage
+        );
+
+        return jdbcTemplate.query("""
+                            SELECT
+                                data
+                            FROM
+                                event_store
+                            ORDER BY
+                                event_date DESC
+                            LIMIT :limit
+                            OFFSET :offset
+                """.trim(), paramMap, new DomainEventWithDataRowMapper());
+    }
+
+    @Override
+    public int getEventsCount() {
+        var result =  jdbcTemplate.queryForObject("""
+                            SELECT
+                                COUNT(*)
+                            FROM
+                                event_store
+                """.trim(), Collections.emptyMap(), Integer.class);
+
+        if (result == null) {
+            return 0;
+        }
+
+        return result;
+    }
+
+    @Override
     public void markEventAsPublished(UUID eventId) {
         try {
             Map<String, Object> paramMap = Map.of(
@@ -178,6 +213,24 @@ public class EventStoreDAOImpl implements EventStoreDAO {
 
             try {
                 return objectMapper.readValue(eventAsJsonString, DomainEvent.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private static class DomainEventWithDataRowMapper implements RowMapper<DomainEventWithData> {
+
+        private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+        @Override
+        public DomainEventWithData mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+            String eventAsJsonString = resultSet.getString("data");
+
+            try {
+                var domainEvent = objectMapper.readValue(eventAsJsonString, DomainEvent.class);
+
+                return new DomainEventWithData(domainEvent, eventAsJsonString);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Voidium Market Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+
+    <style>
+        .inner-box {
+            padding: 1rem;
+        }
+    }
+    </style>
+</head>
+<body>
+<header class="pure-u-24-24">
+    <h1 style="margin: 1rem;">Voidium Market Dashboard</h1>
+</header>
+<section class="pure-u-24-24">
+    <div class="inner-box">
+        <h2>Event Store (<span th:text="${eventsCount}"></span> events)</h2>
+        <table class="pure-table" style="width: 100%;">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Aggregate name</th>
+                <th>Aggregate ID</th>
+                <th>Data</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="event: ${events}">
+                <td th:text="${event.formattedId}" />
+                <td th:text="${event.type}" />
+                <td th:text="${event.formattedDate}" />
+                <td th:text="${event.aggregateName}" />
+                <td th:text="${event.formattedAggregateId}" />
+                <td><textarea th:text="${event.data}" rows="3" cols="80" readonly="readonly" disabled="disabled" /></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="pure-g" style="margin-top: 1rem;">
+            <div class="pure-u-10-24">
+                <a class="pure-button" th:href="@{'../event-store?page=' + ${previousPage}}" th:if="${previousPage != null}">Previous page</a>
+            </div>
+            <div class="pure-u-4-24" th:text="@{'Page ' + ${currentPage} + ' of ' + ${totalPages}}" style="text-align: center;"></div>
+            <div class="pure-u-10-24" style="text-align: right;">
+                <a class="pure-button" th:href="@{'../event-store?page=' + ${nextPage}}" th:if="${nextPage != null}">Next page</a>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

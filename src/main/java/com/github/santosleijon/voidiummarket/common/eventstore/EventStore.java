@@ -52,4 +52,12 @@ public class EventStore {
     public void clear() {
         eventStoreDAO.deleteAll();
     }
+
+    public List<DomainEventWithData> getPaginatedEventsWithData(int page, int eventsPerPage) {
+        return eventStoreDAO.getPaginatedEventsWithData(page, eventsPerPage);
+    }
+
+    public int getEventsCount() {
+        return eventStoreDAO.getEventsCount();
+    }
 }
