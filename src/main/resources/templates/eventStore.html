@@ -19,11 +19,11 @@
             </thead>
             <tbody>
             <tr th:each="event: ${events}">
-                <td th:text="${event.formattedId}" />
+                <td th:text="${event.formattedId}" th:title="${event.id}" />
                 <td th:text="${event.type}" />
                 <td th:text="${event.formattedDate}" />
                 <td th:text="${event.aggregateName}" />
-                <td th:text="${event.formattedAggregateId}" />
+                <td th:text="${event.formattedAggregateId}" th:title="${event.aggregateId}" />
                 <td><textarea th:text="${event.data}" rows="3" cols="80" readonly="readonly" disabled="disabled" /></td>
             </tr>
             </tbody>
