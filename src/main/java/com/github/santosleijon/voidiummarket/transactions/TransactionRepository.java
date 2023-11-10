@@ -31,11 +31,20 @@ public class TransactionRepository {
     }
 
     public List<Transaction> getAll() {
-        var eventsByTransactionId = eventStore.getEventsByAggregateName(Transaction.aggregateName);
+        return getAllPaginated(null, null);
+    }
 
-        return eventsByTransactionId.entrySet().stream()
-                .map(transactionEntry -> new Transaction(transactionEntry.getKey(), transactionEntry.getValue()))
-                .collect(Collectors.toList());
+    public List<Transaction> getAllPaginated(Integer page, Integer transactionsPerPage) {
+        List<Transaction> allTransactions = getAllTransactions();
+
+        if (page == null || page < 1 || transactionsPerPage == null || transactionsPerPage < 1) {
+            return allTransactions;
+        }
+
+        int fromIndex = (page - 1) * transactionsPerPage;
+        int toIndex = Math.min(fromIndex + transactionsPerPage, allTransactions.size()-1);
+
+        return allTransactions.subList(fromIndex, toIndex);
     }
 
     public List<Transaction> getForPurchaseOrder(UUID purchaseOrderId) {
@@ -60,5 +69,17 @@ public class TransactionRepository {
         for (var event : transaction.getPendingEvents()) {
             eventStore.append(event, transaction.getCurrentVersion());
         }
+    }
+
+    public int getTransactionsCount() {
+        return getAllTransactions().size();
+    }
+
+    private List<Transaction> getAllTransactions() {
+        var eventsByTransactionId = eventStore.getEventsByAggregateName(Transaction.aggregateName);
+
+        return eventsByTransactionId.entrySet().stream()
+                .map(transactionEntry -> new Transaction(transactionEntry.getKey(), transactionEntry.getValue()))
+                .toList();
     }
 }

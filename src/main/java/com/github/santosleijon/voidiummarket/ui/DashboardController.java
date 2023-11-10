@@ -25,13 +25,22 @@ public class DashboardController {
     }
 
     @GetMapping("/")
-    public String dashboard(Model model) {
-        var transactions = transactionRepository.getAll()
+    public String dashboard(Model model, @RequestParam(defaultValue = "1") String transactionsPage) {
+        int currentTransactionsPage = Integer.parseInt(transactionsPage);
+        int transactionsPerPage = 20;
+
+        var transactionsCount = transactionRepository.getTransactionsCount();
+
+        model.addAttribute("transactionsCount", transactionsCount);
+
+        var transactions = transactionRepository.getAllPaginated(currentTransactionsPage, transactionsPerPage)
                 .stream()
                 .map(Transaction::toDTO)
                 .collect(Collectors.toList());
 
         model.addAttribute("transactions", transactions);
+
+        setTransactionsPaginationAttributes(model, currentTransactionsPage, transactionsPerPage, transactionsCount);
 
         return "dashboard";
     }
@@ -52,20 +61,34 @@ public class DashboardController {
 
         model.addAttribute("eventsCount", eventsCount);
 
-        int totalPages =  (int) Math.ceil((double) eventsCount / eventsPerPage);
+        setEventsPaginationAttributes(model, currentPage, eventsPerPage, eventsCount);
 
+        return "eventStore";
+    }
+
+    private static void setTransactionsPaginationAttributes(Model model, int currentPage, int transactionsPerPage, int transactionsCount) {
+        int totalPages =  (int) Math.ceil((double) transactionsCount / transactionsPerPage);
         model.addAttribute("totalPages", totalPages);
 
         model.addAttribute("currentPage", currentPage);
 
         Integer previousPage = (currentPage > 1) ? (currentPage - 1) : null;
+        model.addAttribute("previousPage", previousPage);
 
+        Integer nextPage = (currentPage * transactionsPerPage < transactionsCount) ? (currentPage + 1) : null;
+        model.addAttribute("nextPage", nextPage);
+    }
+
+    private static void setEventsPaginationAttributes(Model model, int currentPage, int eventsPerPage, int eventsCount) {
+        int totalPages =  (int) Math.ceil((double) eventsCount / eventsPerPage);
+        model.addAttribute("totalPages", totalPages);
+
+        model.addAttribute("currentPage", currentPage);
+
+        Integer previousPage = (currentPage > 1) ? (currentPage - 1) : null;
         model.addAttribute("previousPage", previousPage);
 
         Integer nextPage = (currentPage * eventsPerPage < eventsCount) ? (currentPage + 1) : null;
-
         model.addAttribute("nextPage", nextPage);
-
-        return "eventStore";
     }
 }
