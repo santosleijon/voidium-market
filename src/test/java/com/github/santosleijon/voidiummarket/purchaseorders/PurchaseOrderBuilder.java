@@ -15,7 +15,7 @@ public class PurchaseOrderBuilder {
     private BigDecimal pricePerUnit = BigDecimal.ONE;
     private Instant placedDate = Instant.now();
     private Instant validTo = Instant.now().plusSeconds(5);
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
 
     public PurchaseOrderBuilder withId(UUID id) {
         this.id = id;

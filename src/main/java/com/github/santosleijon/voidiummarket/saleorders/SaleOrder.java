@@ -8,16 +8,14 @@ import com.github.santosleijon.voidiummarket.common.eventstore.errors.Unexpected
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderDeleted;
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderPlaced;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
-import com.github.santosleijon.voidiummarket.transactions.TransactionDTO;
-import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class SaleOrder extends AggregateRoot {
 
@@ -28,9 +26,9 @@ public class SaleOrder extends AggregateRoot {
     private Instant placedDate;
     private Instant validTo;
     private boolean deleted;
+    private FulfillmentStatus fulfillmentStatus;
 
-    @Nullable
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
 
     @JsonCreator
     public SaleOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
@@ -70,16 +68,16 @@ public class SaleOrder extends AggregateRoot {
     }
 
     public FulfillmentStatus getFulfillmentStatus() {
-        return FulfillmentStatus.fromOrderTransactions(transactions, unitsCount);
+        return fulfillmentStatus;
     }
 
-    @Nullable
     public List<Transaction> getTransactions() {
         return transactions;
     }
 
     public SaleOrder setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+        this.fulfillmentStatus = FulfillmentStatus.fromOrderTransactions(transactions, unitsCount);
         return this;
     }
 
@@ -100,6 +98,7 @@ public class SaleOrder extends AggregateRoot {
             this.placedDate = saleOrderPlaced.getDate();
             this.validTo = saleOrderPlaced.getValidTo();
             this.deleted = false;
+            this.fulfillmentStatus = FulfillmentStatus.UNFULFILLED;
         } else if (event instanceof SaleOrderDeleted) {
             this.deleted = true;
         } else {
@@ -108,13 +107,9 @@ public class SaleOrder extends AggregateRoot {
     }
 
     public SaleOrderDTO toDTO() {
-        List<TransactionDTO> transactionDTOs = null;
-
-        if (transactions != null) {
-            transactionDTOs = transactions.stream()
-                    .map(Transaction::toDTO)
-                    .collect(Collectors.toList());
-        }
+        var transactionDTOs = transactions.stream()
+                .map(Transaction::toDTO)
+                .toList();
 
         return new SaleOrderDTO(
                 this.id,
@@ -122,7 +117,7 @@ public class SaleOrder extends AggregateRoot {
                 this.pricePerUnit,
                 this.validTo,
                 this.deleted,
-                getFulfillmentStatus(),
+                this.fulfillmentStatus,
                 transactionDTOs
         );
     }

@@ -3,6 +3,7 @@ package com.github.santosleijon.voidiummarket.common.eventstore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.santosleijon.voidiummarket.common.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
             Map<String, Object> paramMap = Map.of(
                     "event_id", event.getId(),
                     "type", event.getType(),
-                    "event_date", getZuluLocalDateTime(event.getDate()),
+                    "event_date", TimeUtils.getZuluLocalDateTime(event.getDate()),
                     "aggregate_name", event.getAggregateName(),
                     "aggregate_id", event.getAggregateId(),
                     "data", eventData
@@ -176,7 +175,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
         try {
             Map<String, Object> paramMap = Map.of(
                     "event_id", eventId,
-                    "published_date", getZuluLocalDateTime(Instant.now())
+                    "published_date", TimeUtils.getZuluLocalDateTime(Instant.now())
             );
 
             jdbcTemplate.update("""
@@ -197,10 +196,6 @@ public class EventStoreDAOImpl implements EventStoreDAO {
         jdbcTemplate.update("""
                     DELETE FROM event_store
                 """.trim(), Collections.emptyMap());
-    }
-
-    private LocalDateTime getZuluLocalDateTime(Instant date) {
-        return LocalDateTime.ofInstant(date, ZoneId.of("Z"));
     }
 
     private static class DomainEventRowMapper implements RowMapper<DomainEvent> {

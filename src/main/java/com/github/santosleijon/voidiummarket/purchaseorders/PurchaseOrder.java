@@ -8,16 +8,14 @@ import com.github.santosleijon.voidiummarket.common.eventstore.errors.Unexpected
 import com.github.santosleijon.voidiummarket.purchaseorders.events.PurchaseOrderDeleted;
 import com.github.santosleijon.voidiummarket.purchaseorders.events.PurchaseOrderPlaced;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
-import com.github.santosleijon.voidiummarket.transactions.TransactionDTO;
-import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class PurchaseOrder extends AggregateRoot {
 
@@ -30,8 +28,7 @@ public class PurchaseOrder extends AggregateRoot {
     private boolean deleted;
     private FulfillmentStatus fulfillmentStatus;
 
-    @Nullable
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
 
     @JsonCreator
     public PurchaseOrder(UUID id, Instant placedDate, int unitsCount, BigDecimal pricePerUnit, Instant validTo) {
@@ -67,20 +64,20 @@ public class PurchaseOrder extends AggregateRoot {
     }
 
     public FulfillmentStatus getFulfillmentStatus() {
-        return FulfillmentStatus.fromOrderTransactions(transactions, unitsCount);
+        return fulfillmentStatus;
     }
 
     public boolean isValid() {
         return Instant.now().compareTo(validTo) <= 0;
     }
 
-    @Nullable
     public List<Transaction> getTransactions() {
         return transactions;
     }
 
     public PurchaseOrder setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+        this.fulfillmentStatus = FulfillmentStatus.fromOrderTransactions(transactions, unitsCount);
         return this;
     }
 
@@ -93,13 +90,9 @@ public class PurchaseOrder extends AggregateRoot {
     }
 
     public PurchaseOrderDTO toDTO() {
-        List<TransactionDTO> transactionDTOs = null;
-
-        if (transactions != null) {
-            transactionDTOs = transactions.stream()
-                    .map(Transaction::toDTO)
-                    .collect(Collectors.toList());
-        }
+        var transactionDTOs = transactions.stream()
+                .map(Transaction::toDTO)
+                .toList();
 
         return new PurchaseOrderDTO(
                 id,
@@ -107,7 +100,7 @@ public class PurchaseOrder extends AggregateRoot {
                 pricePerUnit,
                 validTo,
                 deleted,
-                getFulfillmentStatus(),
+                fulfillmentStatus,
                 transactionDTOs);
     }
 
@@ -120,6 +113,7 @@ public class PurchaseOrder extends AggregateRoot {
             this.validTo = purchaseOrderPlaced.getValidTo();
             this.placedDate = purchaseOrderPlaced.getDate();
             this.deleted = false;
+            this.fulfillmentStatus = FulfillmentStatus.UNFULFILLED;
         } else if (event instanceof PurchaseOrderDeleted) {
             this.deleted = true;
         } else {
