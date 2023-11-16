@@ -17,11 +17,20 @@ public class RandomUtil {
     }
 
     public int getRandomInt(int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException("min must be less than or equal to max");
+        }
+
         return random.nextInt(max - min + 1) + min;
     }
 
     public BigDecimal getRandomBigDecimal(BigDecimal min, BigDecimal max) {
-        var randomDouble = random.nextDouble(max.doubleValue() - min.doubleValue() + 1) + min.doubleValue();
-        return BigDecimal.valueOf(randomDouble).setScale(2, RoundingMode.HALF_UP);
+        if (min.compareTo(max) > 0) {
+            throw new IllegalArgumentException("min must be less than or equal to max");
+        }
+
+        double randomWithinBounds = random.nextDouble() * (max.doubleValue() - min.doubleValue()) + min.doubleValue();
+
+        return BigDecimal.valueOf(randomWithinBounds).setScale(2, RoundingMode.HALF_UP);
     }
 }
