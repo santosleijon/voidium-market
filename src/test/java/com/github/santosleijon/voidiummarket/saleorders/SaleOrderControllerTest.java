@@ -1,7 +1,7 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.helpers.StateClearer;
 import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.saleorders.errors.SaleOrderNotFound;
@@ -33,20 +33,20 @@ class SaleOrderControllerTest {
     private final SaleOrderController saleOrderController;
     private final TransactionRepository transactionRepository;
     private final TestHttpClient testHttpClient;
-    private final EventStore eventStore;
+    private final StateClearer stateClearer;
 
     @Autowired
-    SaleOrderControllerTest(SaleOrderService saleOrderService, SaleOrderController saleOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient, EventStore eventStore) {
+    SaleOrderControllerTest(SaleOrderService saleOrderService, SaleOrderController saleOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient, StateClearer stateClearer) {
         this.saleOrderService = saleOrderService;
         this.saleOrderController = saleOrderController;
         this.testHttpClient = testHttpClient;
         this.transactionRepository = transactionRepository;
-        this.eventStore = eventStore;
+        this.stateClearer = stateClearer;
     }
 
     @AfterEach
     void afterEach() {
-        eventStore.clear();
+        stateClearer.clear();
     }
 
     @Test

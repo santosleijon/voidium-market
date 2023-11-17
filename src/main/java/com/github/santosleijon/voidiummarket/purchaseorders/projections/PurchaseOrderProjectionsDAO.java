@@ -1,9 +1,11 @@
 package com.github.santosleijon.voidiummarket.purchaseorders.projections;
 
-import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
+import java.util.List;
 import java.util.UUID;
 
 public interface PurchaseOrderProjectionsDAO {
-    void upsert(PurchaseOrder purchaseOrder);
-    void delete(UUID purchaseOrderId);
+    void upsert(PurchaseOrderProjection purchaseOrder);
+    PurchaseOrderProjection get(UUID purchaseOrderId);
+    List<PurchaseOrderProjection> getAll();
+    void deleteAll();
 }

@@ -1,6 +1,6 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
-import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.helpers.StateClearer;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -20,18 +20,18 @@ class SellerSimulatorTest {
     private final SimulatorConfig simulatorConfig = new SimulatorConfig();
     private final RandomUtil randomUtil;
     private final SaleOrderService saleOrderService;
-    private final EventStore eventStore;
+    private final StateClearer stateClearer;
 
     @Autowired
-    public SellerSimulatorTest(RandomUtil randomUtil, SaleOrderService saleOrderService, EventStore eventStore) {
+    public SellerSimulatorTest(RandomUtil randomUtil, SaleOrderService saleOrderService, StateClearer stateClearer) {
         this.randomUtil = randomUtil;
         this.saleOrderService = saleOrderService;
-        this.eventStore = eventStore;
+        this.stateClearer = stateClearer;
     }
 
     @AfterEach
     void afterEach() {
-        eventStore.clear();
+        stateClearer.clear();
     }
 
     @Test

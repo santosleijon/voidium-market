@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotDeleted;
+import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjection;
 import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 public class PurchaseOrderService {
@@ -26,16 +26,8 @@ public class PurchaseOrderService {
         this.transactionService = transactionService;
     }
 
-    public List<PurchaseOrder> getAll() {
-        return purchaseOrderRepository.getAll();
-    }
-
-    public List<PurchaseOrder> getAllWithTransactions() {
-        var purchaseOrders = purchaseOrderRepository.getAll();
-
-        return purchaseOrders.stream()
-                .map(this::getPurchaseOrderWithTransactions)
-                .collect(Collectors.toList());
+    public List<PurchaseOrderProjection> getAll() {
+        return purchaseOrderRepository.getAllProjections();
     }
 
     @Nullable
@@ -49,6 +41,11 @@ public class PurchaseOrderService {
         var transactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
         return purchaseOrder.setTransactions(transactions);
+    }
+
+    @Nullable
+    public PurchaseOrderProjection getProjection(UUID id) {
+        return purchaseOrderRepository.getProjection(id);
     }
 
     public void place(PurchaseOrder purchaseOrder) {
@@ -76,11 +73,5 @@ public class PurchaseOrderService {
         }
 
         log.info("PurchaseOrder\t{}: Delete order of {} units to unit price of {} CU", purchaseOrder.getId(), purchaseOrder.getUnitsCount(), purchaseOrder.getPricePerUnit());
-    }
-
-    private PurchaseOrder getPurchaseOrderWithTransactions(PurchaseOrder purchaseOrder) {
-        var transactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
-
-        return purchaseOrder.setTransactions(transactions);
     }
 }

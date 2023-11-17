@@ -1,8 +1,8 @@
 package com.github.santosleijon.voidiummarket.broker;
 
 import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
-import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
+import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjection;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
@@ -38,7 +38,7 @@ public class BrokerService {
             return;
         }
 
-        var purchaseOrder = purchaseOrderService.get(purchaseOrderId);
+        var purchaseOrder = purchaseOrderService.getProjection(purchaseOrderId);
 
         if (purchaseOrder == null || purchaseOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || !purchaseOrder.isValid()) {
             return;
@@ -73,7 +73,7 @@ public class BrokerService {
             return;
         }
 
-        var matchingPurchaseOrders = purchaseOrderService.getAllWithTransactions()
+        var matchingPurchaseOrders = purchaseOrderService.getAll()
                 .stream()
                 .filter(purchaseOrder -> isMatchForTransaction(purchaseOrder, saleOrder))
                 .toList();
@@ -91,7 +91,7 @@ public class BrokerService {
         log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
     }
 
-    private boolean isMatchForTransaction(PurchaseOrder purchaseOrder, SaleOrder saleOrder) {
+    private boolean isMatchForTransaction(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
         return purchaseOrder.isValid() &&
                 saleOrder.isValid() &&
                 purchaseOrder.getFulfillmentStatus() != FulfillmentStatus.FULFILLED &&
@@ -100,7 +100,7 @@ public class BrokerService {
                 saleOrder.getUnitsCount() == purchaseOrder.getUnitsCount();
     }
 
-    private Transaction createTransactionForMatchingOrders(PurchaseOrder purchaseOrder, SaleOrder saleOrder) {
+    private Transaction createTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
         var transactionId = UUID.randomUUID();
         var transactionUnitCount = Math.min(purchaseOrder.getUnitsCount(), saleOrder.getUnitsCount());
         var transactionPricePerUnit = purchaseOrder.getPricePerUnit();

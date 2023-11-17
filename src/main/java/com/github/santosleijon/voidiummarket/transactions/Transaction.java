@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.transactions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.santosleijon.voidiummarket.common.AggregateRoot;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.common.eventstore.errors.UnexpectedDomainEvent;
@@ -21,7 +22,14 @@ public class Transaction extends AggregateRoot {
     private Instant date;
 
     @JsonCreator
-    public Transaction(UUID id, UUID purchaseOrderId, UUID saleOrderId, int unitsCount, BigDecimal pricePerUnit, Instant date) {
+    public Transaction(
+            @JsonProperty("id") UUID id,
+            @JsonProperty("purchaseOrderId") UUID purchaseOrderId,
+            @JsonProperty("saleOrderId") UUID saleOrderId,
+            @JsonProperty("unitsCount") int unitsCount,
+            @JsonProperty("pricePerUnit") BigDecimal pricePerUnit,
+            @JsonProperty("date") Instant date
+    ) {
         super(aggregateName, id, 0);
 
         var initEvent = new TransactionCompleted(id, purchaseOrderId, saleOrderId, unitsCount, pricePerUnit, date);

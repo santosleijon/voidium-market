@@ -1,22 +1,25 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjection;
+import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjectionsDAO;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class PurchaseOrderRepository {
 
     private final EventStore eventStore;
+    private final PurchaseOrderProjectionsDAO purchaseOrderProjectionsDAO;
 
     @Autowired
-    public PurchaseOrderRepository(EventStore eventStore) {
+    public PurchaseOrderRepository(EventStore eventStore, PurchaseOrderProjectionsDAO purchaseOrderProjectionsDAO) {
         this.eventStore = eventStore;
+        this.purchaseOrderProjectionsDAO = purchaseOrderProjectionsDAO;
     }
 
     @Nullable
@@ -36,19 +39,26 @@ public class PurchaseOrderRepository {
         return purchaseOrder;
     }
 
-    public boolean exists(UUID id) {
-        var events = eventStore.getEventsByAggregateIdAndName(id, PurchaseOrder.aggregateName);
 
-        return events.size() > 0;
+    @Nullable
+    public PurchaseOrderProjection getProjection(UUID id) {
+        var purchaseOrder = purchaseOrderProjectionsDAO.get(id);
+
+        if (purchaseOrder == null || purchaseOrder.isDeleted()) {
+            return null;
+        }
+
+        return purchaseOrder;
     }
 
-    public List<PurchaseOrder> getAll() {
-        var eventsByPurchaseOrderId = eventStore.getEventsByAggregateName(PurchaseOrder.aggregateName);
+    public boolean exists(UUID id) {
+        return purchaseOrderProjectionsDAO.get(id) != null;
+    }
 
-        return eventsByPurchaseOrderId.entrySet().stream()
-                .map(purchaseOrderEntry -> new PurchaseOrder(purchaseOrderEntry.getKey(), purchaseOrderEntry.getValue()))
+    public List<PurchaseOrderProjection> getAllProjections() {
+        return purchaseOrderProjectionsDAO.getAll().stream()
                 .filter(purchaseOrder -> !purchaseOrder.isDeleted())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void save(PurchaseOrder purchaseOrder) {

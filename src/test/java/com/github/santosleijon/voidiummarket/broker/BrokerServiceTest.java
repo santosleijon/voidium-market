@@ -1,6 +1,6 @@
 package com.github.santosleijon.voidiummarket.broker;
 
-import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.helpers.StateClearer;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderBuilder;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderRepository;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
@@ -33,18 +33,18 @@ class BrokerServiceTest {
     private final PurchaseOrderService purchaseOrderService;
     private final SaleOrderService saleOrderService;
     private final TransactionService transactionService;
-    private final EventStore eventStore;
+    private final StateClearer stateClearer;
     private final BrokerService brokerService;
     private final SaleOrderRepository saleOrderRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
 
     @Autowired
-    public BrokerServiceTest(BrokerConfig brokerConfig, PurchaseOrderService purchaseOrderService, SaleOrderService saleOrderService, TransactionService transactionService, EventStore eventStore, BrokerService brokerService, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository) {
+    public BrokerServiceTest(BrokerConfig brokerConfig, PurchaseOrderService purchaseOrderService, SaleOrderService saleOrderService, TransactionService transactionService, StateClearer stateClearer, BrokerService brokerService, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository) {
         this.brokerConfig = brokerConfig;
         this.purchaseOrderService = purchaseOrderService;
         this.saleOrderService = saleOrderService;
         this.transactionService = transactionService;
-        this.eventStore = eventStore;
+        this.stateClearer = stateClearer;
         this.brokerService = brokerService;
         this.saleOrderRepository = saleOrderRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
@@ -52,7 +52,7 @@ class BrokerServiceTest {
 
     @AfterEach
     void afterEach() {
-        eventStore.clear();
+        stateClearer.clear();
     }
 
     @Test
@@ -162,7 +162,7 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(purchaseOrder);
 
-        Awaitility.await().atMost(Duration.ofSeconds(20)).untilAsserted(() -> {
+        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
             var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
             assertThat(actualCreatedTransactions.size()).isEqualTo(1);

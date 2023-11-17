@@ -24,6 +24,7 @@ public class PurchaseOrderPlacedListener extends EventListener<PurchaseOrderPlac
     @Override
     public void handle(PurchaseOrderPlaced event) {
         var purchaseOrder = new PurchaseOrder(event.getAggregateId(), Collections.singletonList(event));
-        purchaseOrderProjectionsDAO.upsert(purchaseOrder);
+        var projection = new PurchaseOrderProjection(purchaseOrder);
+        purchaseOrderProjectionsDAO.upsert(projection);
     }
 }

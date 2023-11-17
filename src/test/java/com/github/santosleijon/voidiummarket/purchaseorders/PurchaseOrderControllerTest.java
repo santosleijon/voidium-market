@@ -1,13 +1,14 @@
 package com.github.santosleijon.voidiummarket.purchaseorders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.helpers.StateClearer;
 import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.purchaseorders.errors.PurchaseOrderNotFound;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,20 +34,20 @@ class PurchaseOrderControllerTest {
     private final PurchaseOrderController purchaseOrderController;
     private final TransactionRepository transactionRepository;
     private final TestHttpClient testHttpClient;
-    private final EventStore eventStore;
+    private final StateClearer stateClearer;
 
     @Autowired
-    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient, EventStore eventStore) {
+    PurchaseOrderControllerTest(PurchaseOrderService purchaseOrderService, PurchaseOrderController purchaseOrderController, TransactionRepository transactionRepository, TestHttpClient testHttpClient, StateClearer stateClearer) {
         this.purchaseOrderService = purchaseOrderService;
         this.purchaseOrderController = purchaseOrderController;
         this.transactionRepository = transactionRepository;
         this.testHttpClient = testHttpClient;
-        this.eventStore = eventStore;
+        this.stateClearer = stateClearer;
     }
 
     @AfterEach
     void afterEach() {
-        eventStore.clear();
+        stateClearer.clear();
     }
 
     @Test
@@ -55,9 +56,12 @@ class PurchaseOrderControllerTest {
 
         purchaseOrderService.place(testPurchaseOrder);
 
-        var getPurchaseOrdersResult = testHttpClient.get("/purchase-orders", new TypeReference<List<PurchaseOrderDTO>>() { });
+        Awaitility.await().untilAsserted(() -> {
+            var getPurchaseOrdersResult = testHttpClient.get("/purchase-orders", new TypeReference<List<PurchaseOrderDTO>>() {
+            });
 
-        Assertions.assertThat(getPurchaseOrdersResult).contains(testPurchaseOrder.toDTO());
+            Assertions.assertThat(getPurchaseOrdersResult).contains(testPurchaseOrder.toDTO());
+        });
     }
 
     @Test
@@ -77,9 +81,11 @@ class PurchaseOrderControllerTest {
         purchaseOrderService.place(irrelevantPurchaseOrder);
         transactionRepository.save(expectedTransaction);
 
-        var actualPurchaseOrder = testHttpClient.get("/purchase-orders/" + expectedPurchaseOrder.getId(), new TypeReference<PurchaseOrderDTO>() { });
-
-        Assertions.assertThat(actualPurchaseOrder).isEqualTo(expectedPurchaseOrder.toDTO());
+        Awaitility.await().ignoreExceptions().untilAsserted(() -> {
+            var actualPurchaseOrder = testHttpClient.get("/purchase-orders/" + expectedPurchaseOrder.getId(), new TypeReference<PurchaseOrderDTO>() {
+            });
+            Assertions.assertThat(actualPurchaseOrder).isEqualTo(expectedPurchaseOrder.toDTO());
+        });
     }
 
     @Test
@@ -99,9 +105,10 @@ class PurchaseOrderControllerTest {
 
         testHttpClient.post("/purchase-orders", testPurchaseOrder);
 
-        var getPlacedPurchaseOrderResult = purchaseOrderController.get(testPurchaseOrder.getId());
-
-        Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(testPurchaseOrder.setTransactions(Collections.emptyList()).toDTO());
+        Awaitility.await().ignoreExceptions().untilAsserted(() -> {
+            var getPlacedPurchaseOrderResult = purchaseOrderController.get(testPurchaseOrder.getId());
+            Assertions.assertThat(getPlacedPurchaseOrderResult).isEqualTo(testPurchaseOrder.setTransactions(Collections.emptyList()).toDTO());
+        });
     }
 
     @Test
@@ -110,11 +117,13 @@ class PurchaseOrderControllerTest {
 
         purchaseOrderService.place(testPurchaseOrder);
 
-        testHttpClient.delete("/purchase-orders/" + testPurchaseOrder.getId());
+        Awaitility.await().untilAsserted(() -> {
+            testHttpClient.delete("/purchase-orders/" + testPurchaseOrder.getId());
 
-        Assertions.assertThatThrownBy(() -> purchaseOrderController.get(testPurchaseOrder.getId()))
-                .isInstanceOf(PurchaseOrderNotFound.class);
+            Assertions.assertThatThrownBy(() -> purchaseOrderController.get(testPurchaseOrder.getId()))
+                    .isInstanceOf(PurchaseOrderNotFound.class);
+        });
 
-        Assertions.assertThat(purchaseOrderController.getAll()).doesNotContain(testPurchaseOrder.toDTO());
+        Awaitility.await().untilAsserted(() -> Assertions.assertThat(purchaseOrderController.getAll()).doesNotContain(testPurchaseOrder.toDTO()));
     }
 }

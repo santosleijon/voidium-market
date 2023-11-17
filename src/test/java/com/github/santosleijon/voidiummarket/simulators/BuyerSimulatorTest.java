@@ -1,7 +1,8 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
-import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.helpers.StateClearer;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,18 +22,18 @@ class BuyerSimulatorTest {
     private final SimulatorConfig simulatorConfig = new SimulatorConfig();
     private final RandomUtil randomUtil;
     private final PurchaseOrderService purchaseOrderService;
-    private final EventStore eventStore;
+    private final StateClearer stateClearer;
 
     @Autowired
-    public BuyerSimulatorTest(RandomUtil randomUtil, PurchaseOrderService purchaseOrderService, EventStore eventStore) {
+    public BuyerSimulatorTest(RandomUtil randomUtil, PurchaseOrderService purchaseOrderService, StateClearer stateClearer) {
         this.randomUtil = randomUtil;
         this.purchaseOrderService = purchaseOrderService;
-        this.eventStore = eventStore;
+        this.stateClearer = stateClearer;
     }
 
     @AfterEach
     void afterEach() {
-        eventStore.clear();
+        stateClearer.clear();
     }
 
     @Test
@@ -43,15 +44,17 @@ class BuyerSimulatorTest {
 
         buyerSimulator.run();
 
-        var purchaseOrders = purchaseOrderService.getAll();
+        Awaitility.await().untilAsserted(() -> {
+            var purchaseOrders = purchaseOrderService.getAll();
 
-        assertThat(purchaseOrders.size()).isEqualTo(1);
+            assertThat(purchaseOrders.size()).isEqualTo(1);
 
-        var createdPurchaseOrder = purchaseOrders.get(0);
+            var createdPurchaseOrder = purchaseOrders.get(0);
 
-        assertThat(createdPurchaseOrder.getUnitsCount()).isGreaterThanOrEqualTo(simulatorConfig.getBuyerMinUnitsCount());
-        assertThat(createdPurchaseOrder.getUnitsCount()).isLessThanOrEqualTo(simulatorConfig.getBuyerMaxUnitsCount());
-        assertThat(createdPurchaseOrder.getPricePerUnit()).isGreaterThanOrEqualTo(simulatorConfig.getBuyerMinPricePerUnit());
-        assertThat(createdPurchaseOrder.getPricePerUnit()).isLessThanOrEqualTo(simulatorConfig.getBuyerMaxPricePerUnit());
+            assertThat(createdPurchaseOrder.getUnitsCount()).isGreaterThanOrEqualTo(simulatorConfig.getBuyerMinUnitsCount());
+            assertThat(createdPurchaseOrder.getUnitsCount()).isLessThanOrEqualTo(simulatorConfig.getBuyerMaxUnitsCount());
+            assertThat(createdPurchaseOrder.getPricePerUnit()).isGreaterThanOrEqualTo(simulatorConfig.getBuyerMinPricePerUnit());
+            assertThat(createdPurchaseOrder.getPricePerUnit()).isLessThanOrEqualTo(simulatorConfig.getBuyerMaxPricePerUnit());
+        });
     }
 }
