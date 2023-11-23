@@ -3,7 +3,6 @@ package com.github.santosleijon.voidiummarket.purchaseorders.projections;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.github.santosleijon.voidiummarket.common.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -33,43 +32,20 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
         try {
             var data = objectMapper.writeValueAsString(purchaseOrder);
 
-            Map<String, Object> paramMap = Map.of(
-                    "purchase_order_id", purchaseOrder.getId(),
-                    "units_count", purchaseOrder.getUnitsCount(),
-                    "price_per_unit", purchaseOrder.getPricePerUnit(),
-                    "valid_to", TimeUtils.getZuluLocalDateTime(purchaseOrder.getValidTo()),
-                    "fulfillment_status", purchaseOrder.getFulfillmentStatus().name(),
-                    "data", data,
-                    "version", purchaseOrder.getCurrentVersion()
-            );
+            Map<String, Object> paramMap = Map.of("data", data);
 
             jdbcTemplate.update("""
                         INSERT INTO purchase_order_projections (
                             purchase_order_id,
-                            units_count,
-                            price_per_unit,
-                            valid_to,
-                            fulfillment_status,
-                            data,
-                            version
+                            data
                         )
                         VALUES (
                             :purchase_order_id,
-                            :units_count,
-                            :price_per_unit,
-                            :valid_to,
-                            :fulfillment_status,
-                            :data::jsonb,
-                            :version
+                            :data::jsonb
                         )
                         ON CONFLICT (purchase_order_id)
                         DO UPDATE SET
-                            units_count = :units_count,
-                            price_per_unit = :price_per_unit,
-                            valid_to = :valid_to,
-                            fulfillment_status = :fulfillment_status,
-                            data = :data::jsonb,
-                            version = :version;
+                            data = :data::jsonb
                     """.trim(), paramMap);
         } catch (Exception e) {
             throw new RuntimeException(e);
