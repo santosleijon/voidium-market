@@ -6,7 +6,7 @@ import java.util.List;
 
 public enum FulfillmentStatus {
     FULFILLED,
-    PARTIALLY_FULFILLED,
+    PARTIALLY_FULFILLED, // TODO: Implement support for partially fulfilled orders
     UNFULFILLED;
 
     public static FulfillmentStatus fromOrderTransactions(List<Transaction> orderTransactions, int orderedUnitsCount) {

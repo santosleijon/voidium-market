@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.purchaseorders.projections;
 
+import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.common.eventstreaming.AggregateEventListener;
 import com.github.santosleijon.voidiummarket.common.eventstreaming.EventListener;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
@@ -48,6 +49,8 @@ public class TransactionCompletedListener extends EventListener<TransactionCompl
                 purchaseOrderProjection.getFulfillmentStatus(),
                 purchaseOrderProjection.isDeleted(),
                 updatedTransactionsList);
+
+        updatedProjection.setFulfillmentStatus(FulfillmentStatus.FULFILLED);
 
         purchaseOrderProjectionsDAO.upsert(updatedProjection);
     }
