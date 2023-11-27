@@ -6,6 +6,7 @@ import java.util.UUID;
 public interface PurchaseOrderProjectionsDAO {
     void upsert(PurchaseOrderProjection purchaseOrder);
     PurchaseOrderProjection get(UUID purchaseOrderId);
-    List<PurchaseOrderProjection> getAll();
+    List<PurchaseOrderProjection> getNonDeleted();
+    List<PurchaseOrderProjection> getUnfulfilled();
     void deleteAll();
 }

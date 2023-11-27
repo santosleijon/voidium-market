@@ -20,5 +20,14 @@ public class StateClearer {
     public void clear() {
         eventStore.clear();
         purchaseOrderProjectionsDAO.deleteAll();
+        waitForEventsToBeConsumed();
+    }
+
+    private void waitForEventsToBeConsumed() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

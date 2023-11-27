@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.broker;
 
 import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
+import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrder;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService;
 import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjection;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Component
@@ -33,62 +35,26 @@ public class BrokerService {
         this.saleOrderService = saleOrderService;
     }
 
-    public synchronized void brokerAvailableTransactionForPurchaseOrder(UUID purchaseOrderId) {
+    public synchronized void brokerUnfulfilledTransactions() {
         if (!config.isEnabled()) {
             return;
         }
 
-        var purchaseOrder = purchaseOrderService.getProjection(purchaseOrderId);
+        var unfulfilledPurchaseOrders = new ArrayList<>(purchaseOrderService.getUnfulfilled());
+        var unfulfilledSaleOrders = new ArrayList<>(saleOrderService.getUnfulfilled());
 
-        if (purchaseOrder == null || purchaseOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || !purchaseOrder.isValid()) {
-            return;
-        }
-
-        var matchingSaleOrders = saleOrderService.getAllWithTransactions()
-                .stream()
-                .filter(saleOrder -> isMatchForTransaction(purchaseOrder, saleOrder))
-                .toList();
-
-        if (matchingSaleOrders.size() < 1) {
-            return;
-        }
-
-        var matchingSaleOrder = matchingSaleOrders.get(0);
-
-        var transaction = createTransactionForMatchingOrders(purchaseOrder, matchingSaleOrder);
-
-        transactionRepository.save(transaction);
-
-        log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
+        unfulfilledPurchaseOrders.removeIf(purchaseOrder ->
+                unfulfilledSaleOrders.removeIf(saleOrder -> createAndSaveTransactionForMatchingOrders(purchaseOrder, saleOrder))
+        );
     }
 
-    public synchronized void brokerAvailableTransactionForSaleOrder(UUID saleOrderId) {
-        if (!config.isEnabled()) {
-            return;
+    private boolean createAndSaveTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
+        if (isMatchForTransaction(purchaseOrder, saleOrder)) {
+            saveTransactionForMatchingOrders(purchaseOrder, saleOrder);
+            return true;
         }
 
-        var saleOrder = saleOrderService.get(saleOrderId);
-
-        if (saleOrder == null || saleOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || !saleOrder.isValid()) {
-            return;
-        }
-
-        var matchingPurchaseOrders = purchaseOrderService.getAll()
-                .stream()
-                .filter(purchaseOrder -> isMatchForTransaction(purchaseOrder, saleOrder))
-                .toList();
-
-        if (matchingPurchaseOrders.size() < 1) {
-            return;
-        }
-
-        var matchingPurchaseOrder = matchingPurchaseOrders.get(0);
-
-        var transaction = createTransactionForMatchingOrders(matchingPurchaseOrder, saleOrder);
-
-        transactionRepository.save(transaction);
-
-        log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
+        return false;
     }
 
     private boolean isMatchForTransaction(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
@@ -100,7 +66,23 @@ public class BrokerService {
                 saleOrder.getUnitsCount() == purchaseOrder.getUnitsCount();
     }
 
-    private Transaction createTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
+    private void saveTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrderProjection, SaleOrder matchingSaleOrder) {
+        var purchaseOrder = purchaseOrderService.get(purchaseOrderProjection.getId());
+        var saleOrder = saleOrderService.get(matchingSaleOrder.getId());
+
+        // Ensure that orders are not fulfilled yet
+        if (purchaseOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || saleOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED) {
+            return;
+        }
+
+        var transaction = createTransactionForMatchingOrders(purchaseOrder, saleOrder);
+
+        transactionRepository.save(transaction);
+
+        log.info("Transaction\t\t{}: Brokered transaction between purchase order {} and sale order {}", transaction.getId(), transaction.getPurchaseOrderId(), transaction.getSaleOrderId());
+    }
+
+    private Transaction createTransactionForMatchingOrders(PurchaseOrder purchaseOrder, SaleOrder saleOrder) {
         var transactionId = UUID.randomUUID();
         var transactionUnitCount = Math.min(purchaseOrder.getUnitsCount(), saleOrder.getUnitsCount());
         var transactionPricePerUnit = purchaseOrder.getPricePerUnit();

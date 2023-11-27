@@ -32,7 +32,10 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
         try {
             var data = objectMapper.writeValueAsString(purchaseOrder);
 
-            Map<String, Object> paramMap = Map.of("data", data);
+            Map<String, Object> paramMap = Map.of(
+                    "purchase_order_id", purchaseOrder.getId(),
+                    "data", data
+            );
 
             jdbcTemplate.update("""
                         INSERT INTO purchase_order_projections (
@@ -74,12 +77,28 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
     }
 
     @Override
-    public List<PurchaseOrderProjection> getAll() {
+    public List<PurchaseOrderProjection> getNonDeleted() {
         return jdbcTemplate.query("""
                             SELECT
                                 data
                             FROM
                                 purchase_order_projections
+                            WHERE
+                                (data->>'deleted')::boolean IS FALSE
+                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper());
+    }
+
+    @Override
+    public List<PurchaseOrderProjection> getUnfulfilled() {
+        return jdbcTemplate.query("""
+                            SELECT
+                                data
+                            FROM
+                                purchase_order_projections
+                            WHERE
+                                data->>'fulfillmentStatus' = 'UNFULFILLED'
+                            ORDER BY
+                                data->>'placedDate'
                 """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper());
     }
 

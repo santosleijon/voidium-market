@@ -21,6 +21,6 @@ public class SaleOrderPlacedEventListener extends EventListener<SaleOrderPlaced>
 
     @Override
     public void handle(SaleOrderPlaced event) {
-        brokerService.brokerAvailableTransactionForSaleOrder(event.getAggregateId());
+        brokerService.brokerUnfulfilledTransactions();
     }
 }

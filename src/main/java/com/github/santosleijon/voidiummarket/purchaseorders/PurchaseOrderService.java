@@ -27,7 +27,11 @@ public class PurchaseOrderService {
     }
 
     public List<PurchaseOrderProjection> getAll() {
-        return purchaseOrderRepository.getAllProjections();
+        return purchaseOrderRepository.getNonDeletedProjections();
+    }
+
+    public List<PurchaseOrderProjection> getUnfulfilled() {
+        return purchaseOrderRepository.getUnfulfilledProjections();
     }
 
     @Nullable
@@ -41,11 +45,6 @@ public class PurchaseOrderService {
         var transactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
         return purchaseOrder.setTransactions(transactions);
-    }
-
-    @Nullable
-    public PurchaseOrderProjection getProjection(UUID id) {
-        return purchaseOrderRepository.getProjection(id);
     }
 
     public void place(PurchaseOrder purchaseOrder) {

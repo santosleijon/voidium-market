@@ -55,10 +55,12 @@ public class PurchaseOrderRepository {
         return purchaseOrderProjectionsDAO.get(id) != null;
     }
 
-    public List<PurchaseOrderProjection> getAllProjections() {
-        return purchaseOrderProjectionsDAO.getAll().stream()
-                .filter(purchaseOrder -> !purchaseOrder.isDeleted())
-                .toList();
+    public List<PurchaseOrderProjection> getNonDeletedProjections() {
+        return purchaseOrderProjectionsDAO.getNonDeleted();
+    }
+
+    public List<PurchaseOrderProjection> getUnfulfilledProjections() {
+        return purchaseOrderProjectionsDAO.getUnfulfilled();
     }
 
     public void save(PurchaseOrder purchaseOrder) {

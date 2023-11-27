@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
+import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,12 @@ public class SaleOrderRepository {
                 .map(saleOrderEntry -> new SaleOrder(saleOrderEntry.getKey(), saleOrderEntry.getValue()))
                 .filter(saleOrder -> !saleOrder.isDeleted())
                 .collect(Collectors.toList());
+    }
+
+    public List<SaleOrder> getUnfulfilled() {
+        return getAll().stream()
+                .filter(so -> so.getFulfillmentStatus() == FulfillmentStatus.UNFULFILLED)
+                .toList();
     }
 
     public void save(SaleOrder saleOrder) {

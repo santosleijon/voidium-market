@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.mocks;
 
+import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjection;
 import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjectionsDAO;
 
@@ -25,8 +26,15 @@ public class PurchaseOrderProjectionsDAOMock implements PurchaseOrderProjections
     }
 
     @Override
-    public List<PurchaseOrderProjection> getAll() {
+    public List<PurchaseOrderProjection> getNonDeleted() {
         return projections;
+    }
+
+    @Override
+    public List<PurchaseOrderProjection> getUnfulfilled() {
+        return projections.stream().
+                filter(po -> po.getFulfillmentStatus() == FulfillmentStatus.UNFULFILLED)
+                .toList();
     }
 
     @Override

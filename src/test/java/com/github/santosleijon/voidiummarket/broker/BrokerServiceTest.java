@@ -18,7 +18,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -94,8 +93,6 @@ class BrokerServiceTest {
 
         saleOrderRepository.save(matchingSaleOrder);
 
-        brokerService.brokerAvailableTransactionForSaleOrder(matchingSaleOrder.getId());
-
         var unfulfilledSaleOrder = new SaleOrderBuilder()
                 .withUnitsCount(purchaseOrder.getUnitsCount())
                 .withPricePerUnit(purchaseOrder.getPricePerUnit())
@@ -104,6 +101,8 @@ class BrokerServiceTest {
         saleOrderService.place(unfulfilledSaleOrder);
 
         Awaitility.await().untilAsserted(() -> {
+            brokerService.brokerUnfulfilledTransactions();
+
             var transactionsForUnfulfilledSaleOrder = transactionService.getForSaleOrder(unfulfilledSaleOrder.getId());
 
             assertThat(transactionsForUnfulfilledSaleOrder.size()).isEqualTo(0);
@@ -128,8 +127,6 @@ class BrokerServiceTest {
 
         purchaseOrderRepository.save(matchingPurchaseOrder);
 
-        brokerService.brokerAvailableTransactionForSaleOrder(saleOrder.getId());
-
         var unfulfilledPurchaseOrder = new PurchaseOrderBuilder()
                 .withUnitsCount(saleOrder.getUnitsCount())
                 .withPricePerUnit(saleOrder.getPricePerUnit())
@@ -138,6 +135,8 @@ class BrokerServiceTest {
         purchaseOrderService.place(unfulfilledPurchaseOrder);
 
         Awaitility.await().untilAsserted(() -> {
+            brokerService.brokerUnfulfilledTransactions();
+
             var transactionsForUnfulfilledSaleOrder = transactionService.getForPurchaseOrder(unfulfilledPurchaseOrder.getId());
 
             assertThat(transactionsForUnfulfilledSaleOrder.size()).isEqualTo(0);
@@ -162,7 +161,9 @@ class BrokerServiceTest {
 
         purchaseOrderService.place(purchaseOrder);
 
-        Awaitility.await().atMost(Duration.ofSeconds(30)).untilAsserted(() -> {
+        Awaitility.await().untilAsserted(() -> {
+            brokerService.brokerUnfulfilledTransactions();
+
             var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
             assertThat(actualCreatedTransactions.size()).isEqualTo(1);
@@ -195,6 +196,8 @@ class BrokerServiceTest {
         saleOrderService.place(saleOrder);
 
         Awaitility.await().untilAsserted(() -> {
+            brokerService.brokerUnfulfilledTransactions();
+
             var actualCreatedTransactions = transactionService.getForPurchaseOrder(purchaseOrder.getId());
 
             assertThat(actualCreatedTransactions.size()).isEqualTo(1);
