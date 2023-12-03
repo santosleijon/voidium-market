@@ -2,7 +2,7 @@ package com.github.santosleijon.voidiummarket.httpclient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,7 +21,12 @@ public class TestHttpClient {
             .connectTimeout(Duration.ofSeconds(1))
             .build();
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
+
+    @Autowired
+    private TestHttpClient(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public <T> T get(String url, TypeReference<T> responseType) throws HttpErrorResponse {
         try {

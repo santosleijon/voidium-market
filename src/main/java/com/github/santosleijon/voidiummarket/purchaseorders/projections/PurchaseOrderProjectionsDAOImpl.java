@@ -2,7 +2,6 @@ package com.github.santosleijon.voidiummarket.purchaseorders.projections;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -20,11 +19,12 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public PurchaseOrderProjectionsDAOImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+    public PurchaseOrderProjectionsDAOImpl(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
                             WHERE
                                 purchase_order_id = :purchase_order_id
                             LIMIT 1
-                """.trim(), paramMap, new PurchaseOrderProjectionRowMapper());
+                """.trim(), paramMap, new PurchaseOrderProjectionRowMapper(objectMapper));
 
         if (purchaseOrders.isEmpty()) {
             return null;
@@ -85,7 +85,7 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
                                 purchase_order_projections
                             WHERE
                                 (data->>'deleted')::boolean IS FALSE
-                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper());
+                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
     }
 
     @Override
@@ -99,17 +99,21 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
                                 data->>'fulfillmentStatus' = 'UNFULFILLED'
                             ORDER BY
                                 data->>'placedDate'
-                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper());
+                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
     }
 
     @Override
     public void deleteAll() {
-        jdbcTemplate.query("DELETE FROM purchase_order_projections", Collections.emptyMap(), new PurchaseOrderProjectionRowMapper());
+        jdbcTemplate.query("DELETE FROM purchase_order_projections", Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
     }
 
     private static class PurchaseOrderProjectionRowMapper implements RowMapper<PurchaseOrderProjection> {
 
-        private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        private final ObjectMapper objectMapper;
+
+        private PurchaseOrderProjectionRowMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+        }
 
         @Override
         public PurchaseOrderProjection mapRow(ResultSet resultSet, int rowNum) throws SQLException {

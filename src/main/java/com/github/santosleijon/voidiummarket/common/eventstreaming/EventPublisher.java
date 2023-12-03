@@ -2,7 +2,6 @@ package com.github.santosleijon.voidiummarket.common.eventstreaming;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStoreDAO;
 import org.slf4j.Logger;
@@ -17,16 +16,17 @@ public class EventPublisher {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
 
     private final EventStoreDAO eventStoreDAO;
 
     private static final Logger log = LoggerFactory.getLogger(EventPublisher.class);
 
     @Autowired
-    public EventPublisher(EventStoreDAO eventStoreDAO, KafkaTemplate<String, String> kafkaTemplate) {
+    public EventPublisher(EventStoreDAO eventStoreDAO, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.eventStoreDAO = eventStoreDAO;
         this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Scheduled(fixedRate = 1000)

@@ -2,7 +2,6 @@ package com.github.santosleijon.voidiummarket.common.eventstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.santosleijon.voidiummarket.common.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,11 +20,12 @@ import java.util.UUID;
 public class EventStoreDAOImpl implements EventStoreDAO {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public EventStoreDAOImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+    public EventStoreDAOImpl(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public void insert(DomainEvent event) {
@@ -76,7 +76,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                             WHERE
                                 event_id = :event_id
                             LIMIT 1
-                """.trim(), paramMap, new DomainEventRowMapper());
+                """.trim(), paramMap, new DomainEventRowMapper(objectMapper));
 
         if (events.isEmpty()) {
             return null;
@@ -98,7 +98,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                                 aggregate_name = :aggregate_name
                             ORDER BY
                                 event_date
-                """.trim(), paramMap, new DomainEventRowMapper());
+                """.trim(), paramMap, new DomainEventRowMapper(objectMapper));
     }
 
     @Override
@@ -118,7 +118,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                                 aggregate_name = :aggregate_name
                             ORDER BY
                                 event_date
-                """.trim(), paramMap, new DomainEventRowMapper());
+                """.trim(), paramMap, new DomainEventRowMapper(objectMapper));
     }
 
     @Override
@@ -132,7 +132,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                                 published IS NULL
                             ORDER BY
                                 event_date
-                """.trim(), new DomainEventRowMapper());
+                """.trim(), new DomainEventRowMapper(objectMapper));
     }
 
     @Override
@@ -151,7 +151,7 @@ public class EventStoreDAOImpl implements EventStoreDAO {
                                 event_date DESC
                             LIMIT :limit
                             OFFSET :offset
-                """.trim(), paramMap, new DomainEventWithDataRowMapper());
+                """.trim(), paramMap, new DomainEventWithDataRowMapper(objectMapper));
     }
 
     @Override
@@ -200,7 +200,11 @@ public class EventStoreDAOImpl implements EventStoreDAO {
 
     private static class DomainEventRowMapper implements RowMapper<DomainEvent> {
 
-        private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        private final ObjectMapper objectMapper;
+
+        private DomainEventRowMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+        }
 
         @Override
         public DomainEvent mapRow(ResultSet resultSet, int rowNum) throws SQLException {
@@ -216,7 +220,11 @@ public class EventStoreDAOImpl implements EventStoreDAO {
 
     private static class DomainEventWithDataRowMapper implements RowMapper<DomainEventWithData> {
 
-        private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+        private final ObjectMapper objectMapper;
+
+        private DomainEventWithDataRowMapper(ObjectMapper objectMapper) {
+            this.objectMapper = objectMapper;
+        }
 
         @Override
         public DomainEventWithData mapRow(ResultSet resultSet, int rowNum) throws SQLException {
