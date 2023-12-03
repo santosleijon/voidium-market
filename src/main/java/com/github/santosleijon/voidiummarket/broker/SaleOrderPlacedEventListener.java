@@ -1,26 +1,29 @@
 package com.github.santosleijon.voidiummarket.broker;
 
-import com.github.santosleijon.voidiummarket.common.eventstreaming.AggregateEventListener;
-import com.github.santosleijon.voidiummarket.common.eventstreaming.EventListener;
+import com.github.santosleijon.voidiummarket.common.eventstore.DomainEvent;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
 import com.github.santosleijon.voidiummarket.saleorders.events.SaleOrderPlaced;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 @Component
-@AggregateEventListener(aggregate = SaleOrder.aggregateName, groupId = "broker.SaleOrderPlacedEventListener")
-public class SaleOrderPlacedEventListener extends EventListener<SaleOrderPlaced> {
+public class SaleOrderPlacedEventListener {
 
     private final BrokerService brokerService;
 
     @Autowired
     public SaleOrderPlacedEventListener(BrokerService brokerService) {
-        super(SaleOrderPlaced.class);
         this.brokerService = brokerService;
     }
 
-    @Override
-    public void handle(SaleOrderPlaced event) {
-        brokerService.brokerUnfulfilledTransactions();
+    @KafkaListener(
+            topics = SaleOrder.aggregateName,
+            groupId = "broker.SaleOrderPlacedEventListener.handleSaleOrderPlacedEvents"
+    )
+    public void handleSaleOrderPlacedEvents(DomainEvent event) {
+        if (event instanceof SaleOrderPlaced) {
+            brokerService.brokerUnfulfilledTransactions();
+        }
     }
 }
