@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -26,11 +28,16 @@ public class PurchaseOrderProjector {
         this.purchaseOrderProjectionsDAO = purchaseOrderProjectionsDAO;
     }
 
+    @RetryableTopic(
+            backoff = @Backoff(value = 3000L),
+            attempts = "3",
+            include = PurchaseOrderProjectionNotFound.class
+    )
     @KafkaListener(
             topics = PurchaseOrder.aggregateName,
             groupId = "PurchaseOrderProjection.handlePurchaseOrderEvents"
     )
-    public void handlePurchaseOrderEvents(DomainEvent event) {
+    public void handlePurchaseOrderEvents(DomainEvent event) throws PurchaseOrderProjectionNotFound {
         switch (event) {
             case PurchaseOrderPlaced purchaseOrderPlacedEvent -> handlePurchaseOrderPlacedEvent(purchaseOrderPlacedEvent);
             case PurchaseOrderDeleted purchaseOrderDeletedEvent -> handlePurchaseOrderDeletedEvent(purchaseOrderDeletedEvent);
@@ -38,11 +45,16 @@ public class PurchaseOrderProjector {
         }
     }
 
+    @RetryableTopic(
+            backoff = @Backoff(value = 3000L),
+            attempts = "3",
+            include = PurchaseOrderProjectionNotFound.class
+    )
     @KafkaListener(
             topics = Transaction.aggregateName,
             groupId = "PurchaseOrderProjection.handleTransactionEvents"
     )
-    public void handleTransactionEvents(DomainEvent event) {
+    public void handleTransactionEvents(DomainEvent event) throws PurchaseOrderProjectionNotFound {
         if (event instanceof TransactionCompleted transactionCompletedEvent) {
             handleTransactionCompletedEvent(transactionCompletedEvent);
         }
@@ -52,14 +64,14 @@ public class PurchaseOrderProjector {
         var purchaseOrder = new PurchaseOrder(event.getAggregateId(), Collections.singletonList(event));
         var projection = new PurchaseOrderProjection(purchaseOrder);
         purchaseOrderProjectionsDAO.upsert(projection);
+        log.info("PurchaseOrder\t{}: Projection created", event.getAggregateId());
     }
 
-    private void handlePurchaseOrderDeletedEvent(PurchaseOrderDeleted event) {
+    private void handlePurchaseOrderDeletedEvent(PurchaseOrderDeleted event) throws PurchaseOrderProjectionNotFound {
         var purchaseOrderProjection = purchaseOrderProjectionsDAO.get(event.getAggregateId());
 
         if (purchaseOrderProjection == null) {
-            log.warn("Purchase order projection {} does not exist", event.getAggregateId());
-            return;
+            throw new PurchaseOrderProjectionNotFound(event.getAggregateId());
         }
 
         var updatedProjection = new PurchaseOrderProjection(
@@ -74,15 +86,26 @@ public class PurchaseOrderProjector {
                 purchaseOrderProjection.getTransactions());
 
         purchaseOrderProjectionsDAO.upsert(updatedProjection);
+
+        log.info("PurchaseOrder\t{}: Projection updated (deleted)", event.getAggregateId());
     }
 
-    private void handleTransactionCompletedEvent(TransactionCompleted event) {
-        var purchaseOrderProjection = purchaseOrderProjectionsDAO.get(event.getAggregateId());
+    private void handleTransactionCompletedEvent(TransactionCompleted event) throws PurchaseOrderProjectionNotFound {
+        var purchaseOrderProjection = purchaseOrderProjectionsDAO.get(event.getPurchaseOrderId());
 
         if (purchaseOrderProjection == null) {
-            log.warn("Purchase order projection {} does not exist", event.getAggregateId());
-            return;
+            throw new PurchaseOrderProjectionNotFound(event.getPurchaseOrderId());
         }
+
+        var newTransaction = new Transaction(
+                event.getAggregateId(),
+                event.getPurchaseOrderId(),
+                event.getSaleOrderId(),
+                event.getUnitsCount(),
+                event.getPricePerUnit(),
+                event.getDate());
+
+        purchaseOrderProjection.getTransactions().add(newTransaction);
 
         var updatedProjection = new PurchaseOrderProjection(
                 purchaseOrderProjection.getId(),
@@ -92,9 +115,11 @@ public class PurchaseOrderProjector {
                 purchaseOrderProjection.getPricePerUnit(),
                 purchaseOrderProjection.getValidTo(),
                 purchaseOrderProjection.getFulfillmentStatus(),
-                true,
+                purchaseOrderProjection.isDeleted(),
                 purchaseOrderProjection.getTransactions());
 
         purchaseOrderProjectionsDAO.upsert(updatedProjection);
+
+        log.info("PurchaseOrder\t{}: Projection updated (new transaction)", event.getAggregateId());
     }
 }
