@@ -1,4 +1,4 @@
-package com.github.santosleijon.voidiummarket.purchaseorders.projections;
+package com.github.santosleijon.voidiummarket.saleorders.projections;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,38 +15,38 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
-public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjectionsDAO {
+public class SaleOrderProjectionsDAOImpl implements SaleOrderProjectionsDAO {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public PurchaseOrderProjectionsDAOImpl(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+    public SaleOrderProjectionsDAOImpl(NamedParameterJdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public void upsert(PurchaseOrderProjection purchaseOrder) {
+    public void upsert(SaleOrderProjection saleOrder) {
         try {
-            var data = objectMapper.writeValueAsString(purchaseOrder);
+            var data = objectMapper.writeValueAsString(saleOrder);
 
             Map<String, Object> paramMap = Map.of(
-                    "purchase_order_id", purchaseOrder.getId(),
+                    "sale_order_id", saleOrder.getId(),
                     "data", data
             );
 
             jdbcTemplate.update("""
-                        INSERT INTO purchase_order_projections (
-                            purchase_order_id,
+                        INSERT INTO sale_order_projections (
+                            sale_order_id,
                             data
                         )
                         VALUES (
-                            :purchase_order_id,
+                            :sale_order_id,
                             :data::jsonb
                         )
-                        ON CONFLICT (purchase_order_id)
+                        ON CONFLICT (sale_order_id)
                         DO UPDATE SET
                             data = :data::jsonb
                     """.trim(), paramMap);
@@ -56,71 +56,71 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
     }
 
     @Override
-    public PurchaseOrderProjection get(UUID purchaseOrderId) {
-        Map<String, Object> paramMap = Map.of("purchase_order_id", purchaseOrderId);
+    public SaleOrderProjection get(UUID saleOrderId) {
+        Map<String, Object> paramMap = Map.of("sale_order_id", saleOrderId);
 
-        var purchaseOrders = jdbcTemplate.query("""
+        var saleOrders = jdbcTemplate.query("""
                             SELECT
                                 data
                             FROM
-                                purchase_order_projections
+                                sale_order_projections
                             WHERE
-                                purchase_order_id = :purchase_order_id
+                                sale_order_id = :sale_order_id
                             LIMIT 1
-                """.trim(), paramMap, new PurchaseOrderProjectionRowMapper(objectMapper));
+                """.trim(), paramMap, new SaleOrderProjectionRowMapper(objectMapper));
 
-        if (purchaseOrders.isEmpty()) {
+        if (saleOrders.isEmpty()) {
             return null;
         }
 
-        return purchaseOrders.get(0);
+        return saleOrders.get(0);
     }
 
     @Override
-    public List<PurchaseOrderProjection> getNonDeleted() {
+    public List<SaleOrderProjection> getNonDeleted() {
         return jdbcTemplate.query("""
                             SELECT
                                 data
                             FROM
-                                purchase_order_projections
+                                sale_order_projections
                             WHERE
                                 (data->>'deleted')::boolean IS FALSE
-                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
+                """.trim(), Collections.emptyMap(), new SaleOrderProjectionRowMapper(objectMapper));
     }
 
     @Override
-    public List<PurchaseOrderProjection> getUnfulfilled() {
+    public List<SaleOrderProjection> getUnfulfilled() {
         return jdbcTemplate.query("""
                             SELECT
                                 data
                             FROM
-                                purchase_order_projections
+                                sale_order_projections
                             WHERE
                                 data->>'fulfillmentStatus' = 'UNFULFILLED'
                             ORDER BY
                                 data->>'placedDate'
-                """.trim(), Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
+                """.trim(), Collections.emptyMap(), new SaleOrderProjectionRowMapper(objectMapper));
     }
 
     @Override
     public void deleteAll() {
-        jdbcTemplate.query("DELETE FROM purchase_order_projections", Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
+        jdbcTemplate.query("DELETE FROM sale_order_projections", Collections.emptyMap(), new SaleOrderProjectionRowMapper(objectMapper));
     }
 
-    private static class PurchaseOrderProjectionRowMapper implements RowMapper<PurchaseOrderProjection> {
+    private static class SaleOrderProjectionRowMapper implements RowMapper<SaleOrderProjection> {
 
         private final ObjectMapper objectMapper;
 
-        private PurchaseOrderProjectionRowMapper(ObjectMapper objectMapper) {
+        private SaleOrderProjectionRowMapper(ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
         }
 
         @Override
-        public PurchaseOrderProjection mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+        public SaleOrderProjection mapRow(ResultSet resultSet, int rowNum) throws SQLException {
             String jsonData = resultSet.getString("data");
 
             try {
-                return objectMapper.readValue(jsonData, PurchaseOrderProjection.class);
+                return objectMapper.readValue(jsonData, SaleOrderProjection.class);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }

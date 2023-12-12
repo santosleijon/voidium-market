@@ -1,23 +1,25 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
-import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.saleorders.projections.SaleOrderProjection;
+import com.github.santosleijon.voidiummarket.saleorders.projections.SaleOrderProjectionsDAO;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class SaleOrderRepository {
 
     private final EventStore eventStore;
+    private final SaleOrderProjectionsDAO saleOrderProjectionsDAO;
 
     @Autowired
-    public SaleOrderRepository(EventStore eventStore) {
+    public SaleOrderRepository(EventStore eventStore, SaleOrderProjectionsDAO saleOrderProjectionsDAO) {
         this.eventStore = eventStore;
+        this.saleOrderProjectionsDAO = saleOrderProjectionsDAO;
     }
 
     @Nullable
@@ -38,24 +40,15 @@ public class SaleOrderRepository {
     }
 
     public boolean exists(UUID id) {
-        var events = eventStore.getEventsByAggregateIdAndName(id, SaleOrder.aggregateName);
-
-        return events.size() > 0;
+        return saleOrderProjectionsDAO.get(id) != null;
     }
 
-    public List<SaleOrder> getAll() {
-        var eventsBySaleOrderId = eventStore.getEventsByAggregateName(SaleOrder.aggregateName);
-
-        return eventsBySaleOrderId.entrySet().stream()
-                .map(saleOrderEntry -> new SaleOrder(saleOrderEntry.getKey(), saleOrderEntry.getValue()))
-                .filter(saleOrder -> !saleOrder.isDeleted())
-                .collect(Collectors.toList());
+    public List<SaleOrderProjection> getNonDeletedProjections() {
+        return saleOrderProjectionsDAO.getNonDeleted();
     }
 
-    public List<SaleOrder> getUnfulfilled() {
-        return getAll().stream()
-                .filter(so -> so.getFulfillmentStatus() == FulfillmentStatus.UNFULFILLED)
-                .toList();
+    public List<SaleOrderProjection> getUnfulfilledProjections() {
+        return saleOrderProjectionsDAO.getUnfulfilled();
     }
 
     public void save(SaleOrder saleOrder) {

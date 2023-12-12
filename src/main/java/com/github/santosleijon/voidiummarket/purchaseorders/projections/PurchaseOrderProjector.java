@@ -35,7 +35,7 @@ public class PurchaseOrderProjector {
     )
     @KafkaListener(
             topics = PurchaseOrder.aggregateName,
-            groupId = "PurchaseOrderProjection.handlePurchaseOrderEvents"
+            groupId = "PurchaseOrderProjector.handlePurchaseOrderEvents"
     )
     public void handlePurchaseOrderEvents(DomainEvent event) throws PurchaseOrderProjectionNotFound {
         switch (event) {
@@ -52,7 +52,7 @@ public class PurchaseOrderProjector {
     )
     @KafkaListener(
             topics = Transaction.aggregateName,
-            groupId = "PurchaseOrderProjection.handleTransactionEvents"
+            groupId = "PurchaseOrderProjector.handleTransactionEvents"
     )
     public void handleTransactionEvents(DomainEvent event) throws PurchaseOrderProjectionNotFound {
         if (event instanceof TransactionCompleted transactionCompletedEvent) {

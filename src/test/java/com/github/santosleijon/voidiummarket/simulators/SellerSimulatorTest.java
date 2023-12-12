@@ -2,7 +2,7 @@ package com.github.santosleijon.voidiummarket.simulators;
 
 import com.github.santosleijon.voidiummarket.helpers.StateClearer;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
-import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
@@ -42,15 +44,17 @@ class SellerSimulatorTest {
 
         sellerSimulator.run();
 
-        var saleOrders = saleOrderService.getAll();
+        Awaitility.await().untilAsserted(() -> {
+            var saleOrders = saleOrderService.getAll();
 
-        Assertions.assertThat(saleOrders.size()).isEqualTo(1);
+            assertThat(saleOrders.size()).isEqualTo(1);
 
-        var createdSaleOrder = saleOrders.get(0);
+            var createdSaleOrder = saleOrders.get(0);
 
-        Assertions.assertThat(createdSaleOrder.getUnitsCount()).isGreaterThanOrEqualTo(simulatorConfig.getSellerMinUnitsCount());
-        Assertions.assertThat(createdSaleOrder.getUnitsCount()).isLessThanOrEqualTo(simulatorConfig.getSellerMaxUnitsCount());
-        Assertions.assertThat(createdSaleOrder.getPricePerUnit()).isGreaterThanOrEqualTo(simulatorConfig.getSellerMinPricePerUnit());
-        Assertions.assertThat(createdSaleOrder.getPricePerUnit()).isLessThanOrEqualTo(simulatorConfig.getSellerMaxPricePerUnit());
+            assertThat(createdSaleOrder.getUnitsCount()).isGreaterThanOrEqualTo(simulatorConfig.getSellerMinUnitsCount());
+            assertThat(createdSaleOrder.getUnitsCount()).isLessThanOrEqualTo(simulatorConfig.getSellerMaxUnitsCount());
+            assertThat(createdSaleOrder.getPricePerUnit()).isGreaterThanOrEqualTo(simulatorConfig.getSellerMinPricePerUnit());
+            assertThat(createdSaleOrder.getPricePerUnit()).isLessThanOrEqualTo(simulatorConfig.getSellerMaxPricePerUnit());
+        });
     }
 }

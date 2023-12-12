@@ -7,7 +7,7 @@ import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.saleorders.errors.SaleOrderNotFound;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
-import org.assertj.core.api.Assertions;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,9 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:test-application.properties")
@@ -57,9 +60,11 @@ class SaleOrderControllerTest {
         saleOrderService.place(testSaleOrder1);
         saleOrderService.place(testSaleOrder2);
 
-        var getAllResult = testHttpClient.get("/sale-orders", new TypeReference<List<SaleOrderDTO>>() { });
+        Awaitility.await().untilAsserted(() -> {
+            var getAllResult = testHttpClient.get("/sale-orders", new TypeReference<List<SaleOrderDTO>>() { });
 
-        Assertions.assertThat(getAllResult).contains(testSaleOrder1.toDTO(), testSaleOrder2.toDTO());
+            assertThat(getAllResult).contains(testSaleOrder1.toDTO(), testSaleOrder2.toDTO());
+        });
     }
 
     @Test
@@ -80,7 +85,7 @@ class SaleOrderControllerTest {
 
         var actualResult = testHttpClient.get("/sale-orders/" + expectedSaleOrderId, new TypeReference<SaleOrderDTO>() { });
 
-        Assertions.assertThat(actualResult).isEqualTo(expectedSaleOrder.toDTO());
+        assertThat(actualResult).isEqualTo(expectedSaleOrder.toDTO());
     }
 
     @Test
@@ -90,7 +95,7 @@ class SaleOrderControllerTest {
         try {
             testHttpClient.get("/sale-orders/" + notFoundSaleOrderId, null);
         } catch (HttpErrorResponse httpErrorResponse) {
-            Assertions.assertThat(httpErrorResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND.value());
+            assertThat(httpErrorResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND.value());
         }
     }
 
@@ -102,7 +107,7 @@ class SaleOrderControllerTest {
 
         var getPlacedSaleOrderResult = saleOrderController.get(testSaleOrder.getId());
 
-        Assertions.assertThat(getPlacedSaleOrderResult).isEqualTo(testSaleOrder.setTransactions(Collections.emptyList()).toDTO());
+        assertThat(getPlacedSaleOrderResult).isEqualTo(testSaleOrder.setTransactions(Collections.emptyList()).toDTO());
     }
 
     @Test
@@ -115,9 +120,9 @@ class SaleOrderControllerTest {
 
         saleOrderController.delete(deleteSaleOrderId);
 
-        Assertions.assertThatThrownBy(() -> saleOrderController.get(deleteSaleOrderId))
+        assertThatThrownBy(() -> saleOrderController.get(deleteSaleOrderId))
                 .isInstanceOf(SaleOrderNotFound.class);
 
-        Assertions.assertThat(saleOrderController.getAll()).doesNotContain(testSaleOrder.toDTO());
+        assertThat(saleOrderController.getAll()).doesNotContain(testSaleOrder.toDTO());
     }
 }

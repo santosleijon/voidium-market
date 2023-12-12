@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 public class SaleOrderController {
@@ -21,8 +20,8 @@ public class SaleOrderController {
     @GetMapping("/sale-orders")
     public List<SaleOrderDTO> getAll() {
         return saleOrderService.getAll().stream()
-                .map(SaleOrder::toDTO)
-                .collect(Collectors.toList());
+                .map(SaleOrderDTO::new)
+                .toList();
     }
 
     @GetMapping("/sale-orders/{id}")

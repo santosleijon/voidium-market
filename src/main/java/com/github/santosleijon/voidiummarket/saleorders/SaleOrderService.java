@@ -1,6 +1,7 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
 import com.github.santosleijon.voidiummarket.saleorders.errors.SaleOrderNotDeleted;
+import com.github.santosleijon.voidiummarket.saleorders.projections.SaleOrderProjection;
 import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import jakarta.annotation.Nullable;
 import org.slf4j.Logger;
@@ -25,12 +26,12 @@ public class SaleOrderService {
         this.transactionService = transactionService;
     }
 
-    public List<SaleOrder> getAll() {
-        return saleOrderRepository.getAll();
+    public List<SaleOrderProjection> getAll() {
+        return saleOrderRepository.getNonDeletedProjections();
     }
 
-    public List<SaleOrder> getUnfulfilled() {
-        return saleOrderRepository.getUnfulfilled();
+    public List<SaleOrderProjection> getUnfulfilled() {
+        return saleOrderRepository.getUnfulfilledProjections();
     }
 
     @Nullable
@@ -71,11 +72,5 @@ public class SaleOrderService {
         } catch (Exception e) {
             throw new SaleOrderNotDeleted(id, e);
         }
-    }
-
-    private SaleOrder getSaleOrderWithTransactions(SaleOrder saleOrder) {
-        var transactions = transactionService.getForSaleOrder(saleOrder.getId());
-
-        return saleOrder.setTransactions(transactions);
     }
 }

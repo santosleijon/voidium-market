@@ -6,6 +6,7 @@ import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderService
 import com.github.santosleijon.voidiummarket.purchaseorders.projections.PurchaseOrderProjection;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrder;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
+import com.github.santosleijon.voidiummarket.saleorders.projections.SaleOrderProjection;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public class BrokerService {
         );
     }
 
-    private boolean createAndSaveTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
+    private boolean createAndSaveTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrder, SaleOrderProjection saleOrder) {
         if (isMatchForTransaction(purchaseOrder, saleOrder)) {
             saveTransactionForMatchingOrders(purchaseOrder, saleOrder);
             return true;
@@ -57,7 +58,7 @@ public class BrokerService {
         return false;
     }
 
-    private boolean isMatchForTransaction(PurchaseOrderProjection purchaseOrder, SaleOrder saleOrder) {
+    private boolean isMatchForTransaction(PurchaseOrderProjection purchaseOrder, SaleOrderProjection saleOrder) {
         return purchaseOrder.isValid() &&
                 saleOrder.isValid() &&
                 purchaseOrder.getFulfillmentStatus() != FulfillmentStatus.FULFILLED &&
@@ -66,12 +67,12 @@ public class BrokerService {
                 saleOrder.getUnitsCount() == purchaseOrder.getUnitsCount();
     }
 
-    private void saveTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrderProjection, SaleOrder matchingSaleOrder) {
+    private void saveTransactionForMatchingOrders(PurchaseOrderProjection purchaseOrderProjection, SaleOrderProjection matchingSaleOrder) {
         var purchaseOrder = purchaseOrderService.get(purchaseOrderProjection.getId());
         var saleOrder = saleOrderService.get(matchingSaleOrder.getId());
 
         // Ensure that orders are not fulfilled yet
-        if (purchaseOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || saleOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED) {
+        if (purchaseOrder == null || purchaseOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED || saleOrder == null || saleOrder.getFulfillmentStatus() == FulfillmentStatus.FULFILLED) {
             return;
         }
 
