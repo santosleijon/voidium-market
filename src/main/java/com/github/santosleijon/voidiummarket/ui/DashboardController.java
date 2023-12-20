@@ -27,7 +27,7 @@ public class DashboardController {
     @GetMapping("/")
     public String dashboard(Model model, @RequestParam(defaultValue = "1") String transactionsPage) {
         int currentTransactionsPage = Integer.parseInt(transactionsPage);
-        int transactionsPerPage = 20;
+        int transactionsPerPage = 10;
 
         var transactionsCount = transactionRepository.getTransactionsCount();
 
@@ -48,7 +48,7 @@ public class DashboardController {
     @GetMapping("event-store")
     public String eventStore(Model model, @RequestParam(defaultValue = "1") String page) {
         int currentPage = Integer.parseInt(page);
-        var eventsPerPage = 20;
+        var eventsPerPage = 10;
 
         var events = eventStore.getPaginatedEventsWithData(currentPage, eventsPerPage)
                 .stream()
