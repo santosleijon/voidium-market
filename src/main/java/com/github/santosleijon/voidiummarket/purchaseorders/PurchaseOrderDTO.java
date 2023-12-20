@@ -17,6 +17,7 @@ public record PurchaseOrderDTO(
         UUID id,
         int unitsCount,
         BigDecimal pricePerUnit,
+        Instant placedDate,
         Instant validTo,
         boolean deleted,
         FulfillmentStatus fulfillmentStatus,
@@ -26,6 +27,7 @@ public record PurchaseOrderDTO(
         this(purchaseOrderProjection.getId(),
                 purchaseOrderProjection.getUnitsCount(),
                 purchaseOrderProjection.getPricePerUnit(),
+                purchaseOrderProjection.getPlacedDate(),
                 purchaseOrderProjection.getValidTo(),
                 purchaseOrderProjection.isDeleted(),
                 purchaseOrderProjection.getFulfillmentStatus(),
@@ -36,6 +38,10 @@ public record PurchaseOrderDTO(
 
     public String formattedId() {
         return UUIDUtil.shorten(id);
+    }
+
+    public String formattedPlacedDate() {
+        return TimeUtils.getFormattedDate(placedDate);
     }
 
     public String formattedValidTo() {

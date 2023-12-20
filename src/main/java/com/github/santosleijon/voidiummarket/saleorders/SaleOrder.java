@@ -115,6 +115,7 @@ public class SaleOrder extends AggregateRoot {
                 this.id,
                 this.unitsCount,
                 this.pricePerUnit,
+                this.placedDate,
                 this.validTo,
                 this.deleted,
                 this.fulfillmentStatus,

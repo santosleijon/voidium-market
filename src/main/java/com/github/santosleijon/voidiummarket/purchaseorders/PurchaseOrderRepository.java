@@ -7,6 +7,7 @@ import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,17 +65,21 @@ public class PurchaseOrderRepository {
     }
 
     public List<PurchaseOrderProjection> getPaginatedProjections(Integer page, Integer purchaseOrdersPerPage) {
-        // TODO: Query database with pagination parameters instead of retrieving all entries
+        // TODO: Query database with pagination parameters instead of retrieving and sorting all entries
         List<PurchaseOrderProjection> allPurchaseOrders = getNonDeletedProjections();
 
         if (page == null || page < 1 || purchaseOrdersPerPage == null || purchaseOrdersPerPage < 1) {
             return allPurchaseOrders;
         }
 
-        int fromIndex = (page - 1) * purchaseOrdersPerPage;
-        int toIndex = Math.min(fromIndex + purchaseOrdersPerPage, allPurchaseOrders.size()-1);
+        var sortedPurchaseOrders = allPurchaseOrders.stream()
+                .sorted(Comparator.comparing(PurchaseOrderProjection::getPlacedDate, Comparator.reverseOrder()))
+                .toList();
 
-        return allPurchaseOrders.subList(fromIndex, toIndex);
+        int fromIndex = (page - 1) * purchaseOrdersPerPage;
+        int toIndex = Math.min(fromIndex + purchaseOrdersPerPage, sortedPurchaseOrders.size()-1);
+
+        return sortedPurchaseOrders.subList(fromIndex, toIndex);
     }
 
     public int getPurchaseOrdersCount() {

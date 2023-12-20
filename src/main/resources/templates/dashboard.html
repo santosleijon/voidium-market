@@ -45,6 +45,7 @@
                     <th>Sale Order ID</th>
                     <th>Units count</th>
                     <th>Price per unit</th>
+                    <th>Placed date</th>
                     <th>Valid to</th>
                 </tr>
                 </thead>
@@ -53,6 +54,7 @@
                     <td th:text="${saleOrder.formattedId}" />
                     <td th:text="${saleOrder.unitsCount}" />
                     <td th:text="${saleOrder.pricePerUnit}" />
+                    <td th:text="${saleOrder.formattedPlacedDate}" />
                     <td th:text="${saleOrder.formattedValidTo}" />
                 </tr>
                 </tbody>
@@ -77,6 +79,7 @@
                     <th>Purchase Order ID</th>
                     <th>Units count</th>
                     <th>Price per unit</th>
+                    <th>Placed date</th>
                     <th>Valid to</th>
                 </tr>
                 </thead>
@@ -85,6 +88,7 @@
                     <td th:text="${purchaseOrder.formattedId}" />
                     <td th:text="${purchaseOrder.unitsCount}" />
                     <td th:text="${purchaseOrder.pricePerUnit}" />
+                    <td th:text="${purchaseOrder.formattedPlacedDate}" />
                     <td th:text="${purchaseOrder.formattedValidTo}" />
                 </tr>
                 </tbody>

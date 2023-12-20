@@ -98,6 +98,7 @@ public class PurchaseOrder extends AggregateRoot {
                 id,
                 unitsCount,
                 pricePerUnit,
+                placedDate,
                 validTo,
                 deleted,
                 fulfillmentStatus,

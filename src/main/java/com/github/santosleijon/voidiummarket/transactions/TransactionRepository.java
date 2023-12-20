@@ -5,6 +5,7 @@ import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,17 +36,21 @@ public class TransactionRepository {
     }
 
     public List<Transaction> getAllPaginated(Integer page, Integer transactionsPerPage) {
-        // TODO: Query database with pagination parameters instead of retrieving all entries
+        // TODO: Query database with pagination parameters instead of retrieving and sorting all entries
         List<Transaction> allTransactions = getAllTransactions();
 
         if (page == null || page < 1 || transactionsPerPage == null || transactionsPerPage < 1) {
             return allTransactions;
         }
 
-        int fromIndex = (page - 1) * transactionsPerPage;
-        int toIndex = Math.min(fromIndex + transactionsPerPage, allTransactions.size()-1);
+        var sortedTransactions = allTransactions.stream()
+                .sorted(Comparator.comparing(Transaction::getDate, Comparator.reverseOrder()))
+                .toList();
 
-        return allTransactions.subList(fromIndex, toIndex);
+        int fromIndex = (page - 1) * transactionsPerPage;
+        int toIndex = Math.min(fromIndex + transactionsPerPage, sortedTransactions.size()-1);
+
+        return sortedTransactions.subList(fromIndex, toIndex);
     }
 
     public List<Transaction> getForPurchaseOrder(UUID purchaseOrderId) {

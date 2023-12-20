@@ -17,6 +17,7 @@ public record SaleOrderDTO(
         UUID id,
         int unitsCount,
         BigDecimal pricePerUnit,
+        Instant placedDate,
         Instant validTo,
         boolean deleted,
         FulfillmentStatus fulfillmentStatus,
@@ -25,6 +26,7 @@ public record SaleOrderDTO(
         this(saleOrderProjection.getId(),
                 saleOrderProjection.getUnitsCount(),
                 saleOrderProjection.getPricePerUnit(),
+                saleOrderProjection.getPlacedDate(),
                 saleOrderProjection.getValidTo(),
                 saleOrderProjection.isDeleted(),
                 saleOrderProjection.getFulfillmentStatus(),
@@ -35,6 +37,10 @@ public record SaleOrderDTO(
 
     public String formattedId() {
         return UUIDUtil.shorten(id);
+    }
+
+    public String formattedPlacedDate() {
+        return TimeUtils.getFormattedDate(placedDate);
     }
 
     public String formattedValidTo() {
