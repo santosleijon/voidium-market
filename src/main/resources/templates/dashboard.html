@@ -17,7 +17,7 @@
             </thead>
             <tbody>
             <tr th:each="transaction: ${transactions}">
-                <td th:text="${transaction.id}" />
+                <td th:text="${transaction.formattedId}" />
                 <td th:text="${transaction.formattedDate}" />
                 <td th:text="${transaction.unitsCount}" />
                 <td th:text="${transaction.pricePerUnit}" />

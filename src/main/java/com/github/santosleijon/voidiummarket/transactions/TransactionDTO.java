@@ -1,5 +1,7 @@
 package com.github.santosleijon.voidiummarket.transactions;
 
+import com.github.santosleijon.voidiummarket.common.UUIDUtil;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -14,6 +16,10 @@ public record TransactionDTO(
         int unitsCount,
         BigDecimal pricePerUnit
 ) {
+    public String formattedId() {
+        return UUIDUtil.shorten(id);
+    }
+
     public String formattedDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .withZone(ZoneId.systemDefault());
