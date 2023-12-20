@@ -63,6 +63,24 @@ public class PurchaseOrderRepository {
         return purchaseOrderProjectionsDAO.getUnfulfilled();
     }
 
+    public List<PurchaseOrderProjection> getPaginatedProjections(Integer page, Integer purchaseOrdersPerPage) {
+        // TODO: Query database with pagination parameters instead of retrieving all entries
+        List<PurchaseOrderProjection> allPurchaseOrders = getNonDeletedProjections();
+
+        if (page == null || page < 1 || purchaseOrdersPerPage == null || purchaseOrdersPerPage < 1) {
+            return allPurchaseOrders;
+        }
+
+        int fromIndex = (page - 1) * purchaseOrdersPerPage;
+        int toIndex = Math.min(fromIndex + purchaseOrdersPerPage, allPurchaseOrders.size()-1);
+
+        return allPurchaseOrders.subList(fromIndex, toIndex);
+    }
+
+    public int getPurchaseOrdersCount() {
+        return getNonDeletedProjections().size();
+    }
+
     public void save(PurchaseOrder purchaseOrder) {
         for (var event : purchaseOrder.getPendingEvents()) {
             eventStore.append(event, purchaseOrder.getCurrentVersion());

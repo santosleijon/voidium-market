@@ -2,6 +2,8 @@ package com.github.santosleijon.voidiummarket.ui;
 
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEventDTO;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderDTO;
+import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderRepository;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderDTO;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderRepository;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
@@ -19,12 +21,14 @@ public class DashboardController {
 
     private final TransactionRepository transactionRepository;
     private final SaleOrderRepository saleOrderRepository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
     private final EventStore eventStore;
 
     @Autowired
-    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, EventStore eventStore) {
+    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, EventStore eventStore) {
         this.transactionRepository = transactionRepository;
         this.saleOrderRepository = saleOrderRepository;
+        this.purchaseOrderRepository = purchaseOrderRepository;
         this.eventStore = eventStore;
     }
 
@@ -32,7 +36,8 @@ public class DashboardController {
     public String dashboard(
             Model model,
             @RequestParam(defaultValue = "1") String transactionsPage,
-            @RequestParam(defaultValue = "1") String saleOrdersPage
+            @RequestParam(defaultValue = "1") String saleOrdersPage,
+            @RequestParam(defaultValue = "1") String purchaseOrdersPage
     ) {
         int currentTransactionsPage = Integer.parseInt(transactionsPage);
 
@@ -41,6 +46,10 @@ public class DashboardController {
         int currentSaleOrdersPage = Integer.parseInt(saleOrdersPage);
 
         setSaleOrdersAttributes(model, currentSaleOrdersPage);
+
+        int currentPurchaseOrdersPage = Integer.parseInt(purchaseOrdersPage);
+
+        setPurchaseOrdersAttributes(model, currentPurchaseOrdersPage);
 
         return "dashboard";
     }
@@ -99,12 +108,12 @@ public class DashboardController {
 
         model.addAttribute("saleOrdersCount", saleOrdersCount);
 
-        var transactions = saleOrderRepository.getPaginatedProjections(currentSaleOrdersPage, saleOrdersPerPage)
+        var saleOrders = saleOrderRepository.getPaginatedProjections(currentSaleOrdersPage, saleOrdersPerPage)
                 .stream()
                 .map(SaleOrderDTO::new)
-                .collect(Collectors.toList());
+                .toList();
 
-        model.addAttribute("saleOrders", transactions);
+        model.addAttribute("saleOrders", saleOrders);
 
         int totalPages =  (int) Math.ceil((double) saleOrdersCount / saleOrdersPerPage);
         model.addAttribute("totalSaleOrdersPages", totalPages);
@@ -116,6 +125,32 @@ public class DashboardController {
 
         Integer nextPage = (currentSaleOrdersPage * saleOrdersPerPage < saleOrdersCount) ? (currentSaleOrdersPage + 1) : null;
         model.addAttribute("nextSaleOrdersPage", nextPage);
+    }
+
+    private void setPurchaseOrdersAttributes(Model model, int currentPurchaseOrdersPage) {
+        int purchaseOrdersPerPage = 10;
+
+        var purchaseOrdersCount = purchaseOrderRepository.getPurchaseOrdersCount();
+
+        model.addAttribute("purchaseOrdersCount", purchaseOrdersCount);
+
+        var purchaseOrders = purchaseOrderRepository.getPaginatedProjections(currentPurchaseOrdersPage, purchaseOrdersPerPage)
+                .stream()
+                .map(PurchaseOrderDTO::new)
+                .toList();
+
+        model.addAttribute("purchaseOrders", purchaseOrders);
+
+        int totalPages =  (int) Math.ceil((double) purchaseOrdersCount / purchaseOrdersPerPage);
+        model.addAttribute("totalPurchaseOrdersPages", totalPages);
+
+        model.addAttribute("currentPurchaseOrdersPage", currentPurchaseOrdersPage);
+
+        Integer previousPage = (currentPurchaseOrdersPage > 1) ? (currentPurchaseOrdersPage - 1) : null;
+        model.addAttribute("previousPurchaseOrdersPage", previousPage);
+
+        Integer nextPage = (currentPurchaseOrdersPage * purchaseOrdersPerPage < purchaseOrdersCount) ? (currentPurchaseOrdersPage + 1) : null;
+        model.addAttribute("nextPurchaseOrdersPage", nextPage);
     }
 
     private static void setEventsPaginationAttributes(Model model, int currentPage, int eventsPerPage, int eventsCount) {
