@@ -2,6 +2,8 @@ package com.github.santosleijon.voidiummarket.ui;
 
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEventDTO;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
+import com.github.santosleijon.voidiummarket.saleorders.SaleOrderDTO;
+import com.github.santosleijon.voidiummarket.saleorders.SaleOrderRepository;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,31 +18,29 @@ import java.util.stream.Collectors;
 public class DashboardController {
 
     private final TransactionRepository transactionRepository;
+    private final SaleOrderRepository saleOrderRepository;
     private final EventStore eventStore;
 
     @Autowired
-    public DashboardController(TransactionRepository transactionRepository, EventStore eventStore) {
+    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, EventStore eventStore) {
         this.transactionRepository = transactionRepository;
+        this.saleOrderRepository = saleOrderRepository;
         this.eventStore = eventStore;
     }
 
     @GetMapping("/")
-    public String dashboard(Model model, @RequestParam(defaultValue = "1") String transactionsPage) {
+    public String dashboard(
+            Model model,
+            @RequestParam(defaultValue = "1") String transactionsPage,
+            @RequestParam(defaultValue = "1") String saleOrdersPage
+    ) {
         int currentTransactionsPage = Integer.parseInt(transactionsPage);
-        int transactionsPerPage = 10;
 
-        var transactionsCount = transactionRepository.getTransactionsCount();
+        setTransactionsAttributes(model, currentTransactionsPage);
 
-        model.addAttribute("transactionsCount", transactionsCount);
+        int currentSaleOrdersPage = Integer.parseInt(saleOrdersPage);
 
-        var transactions = transactionRepository.getAllPaginated(currentTransactionsPage, transactionsPerPage)
-                .stream()
-                .map(Transaction::toDTO)
-                .collect(Collectors.toList());
-
-        model.addAttribute("transactions", transactions);
-
-        setTransactionsPaginationAttributes(model, currentTransactionsPage, transactionsPerPage, transactionsCount);
+        setSaleOrdersAttributes(model, currentSaleOrdersPage);
 
         return "dashboard";
     }
@@ -66,17 +66,56 @@ public class DashboardController {
         return "eventStore";
     }
 
-    private static void setTransactionsPaginationAttributes(Model model, int currentPage, int transactionsPerPage, int transactionsCount) {
+    private void setTransactionsAttributes(Model model, int currentTransactionsPage) {
+        var transactionsPerPage = 10;
+
+        var transactionsCount = transactionRepository.getTransactionsCount();
+
+        model.addAttribute("transactionsCount", transactionsCount);
+
+        var transactions = transactionRepository.getAllPaginated(currentTransactionsPage, transactionsPerPage)
+                .stream()
+                .map(Transaction::toDTO)
+                .collect(Collectors.toList());
+
+        model.addAttribute("transactions", transactions);
+
         int totalPages =  (int) Math.ceil((double) transactionsCount / transactionsPerPage);
-        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalTransactionsPages", totalPages);
 
-        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("currentTransactionsPage", currentTransactionsPage);
 
-        Integer previousPage = (currentPage > 1) ? (currentPage - 1) : null;
-        model.addAttribute("previousPage", previousPage);
+        Integer previousPage = (currentTransactionsPage > 1) ? (currentTransactionsPage - 1) : null;
+        model.addAttribute("previousTransactionsPage", previousPage);
 
-        Integer nextPage = (currentPage * transactionsPerPage < transactionsCount) ? (currentPage + 1) : null;
-        model.addAttribute("nextPage", nextPage);
+        Integer nextPage = (currentTransactionsPage * transactionsPerPage < transactionsCount) ? (currentTransactionsPage + 1) : null;
+        model.addAttribute("nextTransactionsPage", nextPage);
+    }
+
+    private void setSaleOrdersAttributes(Model model, int currentSaleOrdersPage) {
+        int saleOrdersPerPage = 10;
+
+        var saleOrdersCount = saleOrderRepository.getSaleOrdersCount();
+
+        model.addAttribute("saleOrdersCount", saleOrdersCount);
+
+        var transactions = saleOrderRepository.getPaginatedProjections(currentSaleOrdersPage, saleOrdersPerPage)
+                .stream()
+                .map(SaleOrderDTO::new)
+                .collect(Collectors.toList());
+
+        model.addAttribute("saleOrders", transactions);
+
+        int totalPages =  (int) Math.ceil((double) saleOrdersCount / saleOrdersPerPage);
+        model.addAttribute("totalSaleOrdersPages", totalPages);
+
+        model.addAttribute("currentSaleOrdersPage", currentSaleOrdersPage);
+
+        Integer previousPage = (currentSaleOrdersPage > 1) ? (currentSaleOrdersPage - 1) : null;
+        model.addAttribute("previousSaleOrdersPage", previousPage);
+
+        Integer nextPage = (currentSaleOrdersPage * saleOrdersPerPage < saleOrdersCount) ? (currentSaleOrdersPage + 1) : null;
+        model.addAttribute("nextSaleOrdersPage", nextPage);
     }
 
     private static void setEventsPaginationAttributes(Model model, int currentPage, int eventsPerPage, int eventsCount) {

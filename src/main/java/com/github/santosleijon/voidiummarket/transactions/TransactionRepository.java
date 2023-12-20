@@ -35,6 +35,7 @@ public class TransactionRepository {
     }
 
     public List<Transaction> getAllPaginated(Integer page, Integer transactionsPerPage) {
+        // TODO: Query database with pagination parameters instead of retrieving all entries
         List<Transaction> allTransactions = getAllTransactions();
 
         if (page == null || page < 1 || transactionsPerPage == null || transactionsPerPage < 1) {

@@ -1,6 +1,8 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
 import com.github.santosleijon.voidiummarket.common.FulfillmentStatus;
+import com.github.santosleijon.voidiummarket.common.TimeUtils;
+import com.github.santosleijon.voidiummarket.common.UUIDUtil;
 import com.github.santosleijon.voidiummarket.saleorders.projections.SaleOrderProjection;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionDTO;
@@ -29,5 +31,13 @@ public record SaleOrderDTO(
                 saleOrderProjection.getTransactions().stream()
                         .map(Transaction::toDTO)
                         .toList());
+    }
+
+    public String formattedId() {
+        return UUIDUtil.shorten(id);
+    }
+
+    public String formattedValidTo() {
+        return TimeUtils.getFormattedDate(validTo);
     }
 }

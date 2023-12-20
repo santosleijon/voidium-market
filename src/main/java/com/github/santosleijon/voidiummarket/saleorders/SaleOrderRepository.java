@@ -51,6 +51,24 @@ public class SaleOrderRepository {
         return saleOrderProjectionsDAO.getUnfulfilled();
     }
 
+    public List<SaleOrderProjection> getPaginatedProjections(Integer page, Integer transactionsPerPage) {
+        // TODO: Query database with pagination parameters instead of retrieving all entries
+        List<SaleOrderProjection> allSaleOrders = getNonDeletedProjections();
+
+        if (page == null || page < 1 || transactionsPerPage == null || transactionsPerPage < 1) {
+            return allSaleOrders;
+        }
+
+        int fromIndex = (page - 1) * transactionsPerPage;
+        int toIndex = Math.min(fromIndex + transactionsPerPage, allSaleOrders.size()-1);
+
+        return allSaleOrders.subList(fromIndex, toIndex);
+    }
+
+    public int getSaleOrdersCount() {
+        return getNonDeletedProjections().size();
+    }
+
     public void save(SaleOrder saleOrder) {
         for (var event : saleOrder.getPendingEvents()) {
             eventStore.append(event, saleOrder.getCurrentVersion());

@@ -1,10 +1,9 @@
 package com.github.santosleijon.voidiummarket.common.eventstore;
 
+import com.github.santosleijon.voidiummarket.common.TimeUtils;
 import com.github.santosleijon.voidiummarket.common.UUIDUtil;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 public record DomainEventDTO(
@@ -17,10 +16,7 @@ public record DomainEventDTO(
         String data
 ) {
     public String formattedDate() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                .withZone(ZoneId.systemDefault());
-
-        return formatter.format(date);
+        return TimeUtils.getFormattedDate(date);
     }
 
     public String formattedId() {
