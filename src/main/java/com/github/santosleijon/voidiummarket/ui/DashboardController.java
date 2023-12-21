@@ -9,6 +9,7 @@ import com.github.santosleijon.voidiummarket.saleorders.SaleOrderDTO;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderRepository;
 import com.github.santosleijon.voidiummarket.transactions.Transaction;
 import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
+import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,14 +25,16 @@ public class DashboardController {
     private final TransactionRepository transactionRepository;
     private final SaleOrderRepository saleOrderRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final TransactionService transactionService;
     private final EventStore eventStore;
     private final StateClearer stateClearer;
 
     @Autowired
-    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, EventStore eventStore, StateClearer stateClearer) {
+    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, TransactionService transactionService, EventStore eventStore, StateClearer stateClearer) {
         this.transactionRepository = transactionRepository;
         this.saleOrderRepository = saleOrderRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
+        this.transactionService = transactionService;
         this.eventStore = eventStore;
         this.stateClearer = stateClearer;
     }
@@ -56,6 +59,15 @@ public class DashboardController {
         setPurchaseOrdersAttributes(model, currentPurchaseOrdersPage);
 
         return "dashboard";
+    }
+
+    @GetMapping("price-graph")
+    public String priceGraph(Model model) {
+        var priceDetails = transactionService.getPriceDetailsPerMinute();
+
+        model.addAttribute("priceDetails", priceDetails);
+
+        return "priceGraph";
     }
 
     @GetMapping("event-store")
