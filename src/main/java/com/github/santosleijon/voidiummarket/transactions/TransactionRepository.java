@@ -48,7 +48,7 @@ public class TransactionRepository {
                 .toList();
 
         int fromIndex = (page - 1) * transactionsPerPage;
-        int toIndex = Math.min(fromIndex + transactionsPerPage, sortedTransactions.size()-1);
+        int toIndex = Math.min(fromIndex + transactionsPerPage, Math.max(sortedTransactions.size()-1, 0));
 
         return sortedTransactions.subList(fromIndex, toIndex);
     }

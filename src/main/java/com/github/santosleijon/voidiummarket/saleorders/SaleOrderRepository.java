@@ -65,7 +65,7 @@ public class SaleOrderRepository {
                 .toList();
 
         int fromIndex = (page - 1) * saleOrdersPerPage;
-        int toIndex = Math.min(fromIndex + saleOrdersPerPage, sortedSaleOrders.size()-1);
+        int toIndex = Math.min(fromIndex + saleOrdersPerPage, Math.max(sortedSaleOrders.size()-1, 0));
 
         return sortedSaleOrders.subList(fromIndex, toIndex);
     }

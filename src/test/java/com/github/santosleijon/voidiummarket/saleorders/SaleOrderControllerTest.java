@@ -1,7 +1,7 @@
 package com.github.santosleijon.voidiummarket.saleorders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.github.santosleijon.voidiummarket.helpers.StateClearer;
+import com.github.santosleijon.voidiummarket.admin.StateClearer;
 import com.github.santosleijon.voidiummarket.httpclient.HttpErrorResponse;
 import com.github.santosleijon.voidiummarket.httpclient.TestHttpClient;
 import com.github.santosleijon.voidiummarket.saleorders.errors.SaleOrderNotFound;
@@ -49,7 +49,7 @@ class SaleOrderControllerTest {
 
     @AfterEach
     void afterEach() {
-        stateClearer.clear();
+        stateClearer.deleteAllData();
     }
 
     @Test

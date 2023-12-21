@@ -77,7 +77,7 @@ public class PurchaseOrderRepository {
                 .toList();
 
         int fromIndex = (page - 1) * purchaseOrdersPerPage;
-        int toIndex = Math.min(fromIndex + purchaseOrdersPerPage, sortedPurchaseOrders.size()-1);
+        int toIndex = Math.min(fromIndex + purchaseOrdersPerPage, Math.max(sortedPurchaseOrders.size()-1, 0));
 
         return sortedPurchaseOrders.subList(fromIndex, toIndex);
     }

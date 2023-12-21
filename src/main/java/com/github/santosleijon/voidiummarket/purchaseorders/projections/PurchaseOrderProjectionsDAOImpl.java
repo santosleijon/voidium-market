@@ -104,7 +104,7 @@ public class PurchaseOrderProjectionsDAOImpl implements PurchaseOrderProjections
 
     @Override
     public void deleteAll() {
-        jdbcTemplate.query("DELETE FROM purchase_order_projections", Collections.emptyMap(), new PurchaseOrderProjectionRowMapper(objectMapper));
+        jdbcTemplate.update("DELETE FROM purchase_order_projections", Collections.emptyMap());
     }
 
     private static class PurchaseOrderProjectionRowMapper implements RowMapper<PurchaseOrderProjection> {

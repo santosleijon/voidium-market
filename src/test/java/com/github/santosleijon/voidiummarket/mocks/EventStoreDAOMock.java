@@ -58,7 +58,7 @@ public class EventStoreDAOMock implements EventStoreDAO {
     @Override
     public List<DomainEventWithData> getPaginatedEventsWithData(int page, int eventsPerPage) {
         int fromIndex = (page - 1) * eventsPerPage;
-        int toIndex = Math.min(fromIndex + eventsPerPage, events.size()-1);
+        int toIndex = Math.min(fromIndex + eventsPerPage, Math.max(events.size()-1, 0));
 
         return events.subList(fromIndex, toIndex)
                 .stream()

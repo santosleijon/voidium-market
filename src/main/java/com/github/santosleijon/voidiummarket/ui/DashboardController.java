@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.ui;
 
+import com.github.santosleijon.voidiummarket.admin.StateClearer;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEventDTO;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
 import com.github.santosleijon.voidiummarket.purchaseorders.PurchaseOrderDTO;
@@ -11,10 +12,11 @@ import com.github.santosleijon.voidiummarket.transactions.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
+
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 @Controller
 public class DashboardController {
@@ -23,13 +25,15 @@ public class DashboardController {
     private final SaleOrderRepository saleOrderRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final EventStore eventStore;
+    private final StateClearer stateClearer;
 
     @Autowired
-    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, EventStore eventStore) {
+    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, EventStore eventStore, StateClearer stateClearer) {
         this.transactionRepository = transactionRepository;
         this.saleOrderRepository = saleOrderRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.eventStore = eventStore;
+        this.stateClearer = stateClearer;
     }
 
     @GetMapping("/")
@@ -73,6 +77,12 @@ public class DashboardController {
         setEventsPaginationAttributes(model, currentPage, eventsPerPage, eventsCount);
 
         return "eventStore";
+    }
+
+    @RequestMapping(value = "/", method = DELETE)
+    @ResponseBody
+    public void deleteAll() {
+        stateClearer.deleteAllData();
     }
 
     private void setTransactionsAttributes(Model model, int currentTransactionsPage) {

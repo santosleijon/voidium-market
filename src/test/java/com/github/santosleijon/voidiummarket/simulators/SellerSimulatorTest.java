@@ -1,6 +1,6 @@
 package com.github.santosleijon.voidiummarket.simulators;
 
-import com.github.santosleijon.voidiummarket.helpers.StateClearer;
+import com.github.santosleijon.voidiummarket.admin.StateClearer;
 import com.github.santosleijon.voidiummarket.saleorders.SaleOrderService;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +33,7 @@ class SellerSimulatorTest {
 
     @AfterEach
     void afterEach() {
-        stateClearer.clear();
+        stateClearer.deleteAllData();
     }
 
     @Test

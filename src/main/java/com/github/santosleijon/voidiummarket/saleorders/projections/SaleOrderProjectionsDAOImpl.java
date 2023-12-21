@@ -104,7 +104,7 @@ public class SaleOrderProjectionsDAOImpl implements SaleOrderProjectionsDAO {
 
     @Override
     public void deleteAll() {
-        jdbcTemplate.query("DELETE FROM sale_order_projections", Collections.emptyMap(), new SaleOrderProjectionRowMapper(objectMapper));
+        jdbcTemplate.update("DELETE FROM sale_order_projections", Collections.emptyMap());
     }
 
     private static class SaleOrderProjectionRowMapper implements RowMapper<SaleOrderProjection> {
