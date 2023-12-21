@@ -40,7 +40,16 @@ public class DashboardController {
     }
 
     @GetMapping("/")
-    public String dashboard(
+    public String priceGraph(Model model) {
+        var priceDetails = transactionService.getPriceDetailsPerMinute();
+
+        model.addAttribute("priceDetails", priceDetails);
+
+        return "priceGraph";
+    }
+
+    @GetMapping("admin")
+    public String admin(
             Model model,
             @RequestParam(defaultValue = "1") String transactionsPage,
             @RequestParam(defaultValue = "1") String saleOrdersPage,
@@ -58,16 +67,7 @@ public class DashboardController {
 
         setPurchaseOrdersAttributes(model, currentPurchaseOrdersPage);
 
-        return "dashboard";
-    }
-
-    @GetMapping("price-graph")
-    public String priceGraph(Model model) {
-        var priceDetails = transactionService.getPriceDetailsPerMinute();
-
-        model.addAttribute("priceDetails", priceDetails);
-
-        return "priceGraph";
+        return "admin";
     }
 
     @GetMapping("event-store")
