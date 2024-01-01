@@ -1,5 +1,6 @@
 package com.github.santosleijon.voidiummarket.transactions;
 
+import com.github.santosleijon.voidiummarket.common.TimeUtils;
 import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,6 @@ public class TransactionService {
         var highPrice = Collections.max(pricesDuringMinute);
         var lowPrice = Collections.min(pricesDuringMinute);
 
-        return new PriceDetailsPerTimeUnit(entrySet.getKey(), openPrice, closePrice, highPrice, lowPrice);
+        return new PriceDetailsPerTimeUnit(TimeUtils.getFormattedDate(entrySet.getKey()), openPrice, closePrice, highPrice, lowPrice);
     }
 }

@@ -1,5 +1,7 @@
 package com.github.santosleijon.voidiummarket.ui;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.santosleijon.voidiummarket.admin.StateClearer;
 import com.github.santosleijon.voidiummarket.common.eventstore.DomainEventDTO;
 import com.github.santosleijon.voidiummarket.common.eventstore.EventStore;
@@ -28,24 +30,32 @@ public class DashboardController {
     private final TransactionService transactionService;
     private final EventStore eventStore;
     private final StateClearer stateClearer;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, TransactionService transactionService, EventStore eventStore, StateClearer stateClearer) {
+    public DashboardController(TransactionRepository transactionRepository, SaleOrderRepository saleOrderRepository, PurchaseOrderRepository purchaseOrderRepository, TransactionService transactionService, EventStore eventStore, StateClearer stateClearer, ObjectMapper objectMapper) {
         this.transactionRepository = transactionRepository;
         this.saleOrderRepository = saleOrderRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
         this.transactionService = transactionService;
         this.eventStore = eventStore;
         this.stateClearer = stateClearer;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/")
-    public String priceGraph(Model model) {
+    public String priceChart(Model model) {
         var priceDetails = transactionService.getPriceDetailsPerMinute();
 
         model.addAttribute("priceDetails", priceDetails);
 
-        return "priceGraph";
+        try {
+            model.addAttribute("priceDetailsJson", objectMapper.writeValueAsString(priceDetails));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return "priceChart";
     }
 
     @GetMapping("admin")

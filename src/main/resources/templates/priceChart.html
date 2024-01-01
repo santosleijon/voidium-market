@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Voidium Market Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css" integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls" crossorigin="anonymous">
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        /*<![CDATA[*/
+        var priceDetails = [(${priceDetailsJson})];
+        /*]]>*/
+
+        console.log(priceDetails);
+
+        var formattedPriceDetails = priceDetails.map((p) => [ p.time, p.lowPrice, p.closePrice, p.openPrice, p.highPrice ]);
+
+        console.log(formattedPriceDetails);
+
+        var chartData = google.visualization.arrayToDataTable(formattedPriceDetails, true);
+
+        var options = {
+          legend:'none'
+        };
+
+        var chart = new google.visualization.CandlestickChart(document.getElementById('price-chart'));
+
+        chart.draw(chartData, options);
+      }
+    </script>
+</head>
+<body>
+<nav th:replace="~{layout :: nav}"></nav>
+<section class="pure-u-24-24">
+    <div style="padding: 1rem;">
+        <h2>Price Chart</h2>
+        <div id="price-chart" style="width: 1200px; height: 400px;"></div>
+    </div>
+    <div style="padding: 1rem;">
+        <h2>Price Chart Table</h2>
+        <table class="pure-table" id="price-table" style="width: 100%;">
+            <thead>
+            <tr>
+                <th>Time</th>
+                <th>Open price</th>
+                <th>Close price</th>
+                <th>High price</th>
+                <th>Low price</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="priceDetail: ${priceDetails}">
+                <td th:text="${priceDetail.time}" />
+                <td th:text="${priceDetail.openPrice}" />
+                <td th:text="${priceDetail.closePrice}" />
+                <td th:text="${priceDetail.highPrice}" />
+                <td th:text="${priceDetail.lowPrice}" />
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+<footer th:replace="~{layout :: footer}"></footer>
+</body>
+</html>
