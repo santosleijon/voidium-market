@@ -8,6 +8,8 @@ It has the following features:
 * Simulators for simulating buyers and sellers placing orders
 * Web UI for viewing price information, transactions, orders and all events recorded in the system
 
+![Screenshot of admin UI](https://github.com/santosleijon/voidium-market/blob/main/docs/demo.png?raw=true)
+
 ## Getting started
 
 1. Download the Git repo:
