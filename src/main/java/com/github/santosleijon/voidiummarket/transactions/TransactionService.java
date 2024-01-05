@@ -7,10 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
@@ -53,6 +50,7 @@ public class TransactionService {
                 .collect(toMap(Map.Entry::getKey, TransactionService::getPriceDetailsFromTransactionsEntrySet))
                 .values()
                 .stream()
+                .sorted(Comparator.comparing(PriceDetailsPerTimeUnit::time))
                 .toList();
     }
 
@@ -60,8 +58,8 @@ public class TransactionService {
         var transactions = entrySet.getValue();
         var pricesDuringMinute = transactions.stream().map(Transaction::getPricePerUnit).toList();
 
-        var openPrice = pricesDuringMinute.get(pricesDuringMinute.size()-1);
-        var closePrice = pricesDuringMinute.get(0);
+        var openPrice = pricesDuringMinute.getLast();
+        var closePrice = pricesDuringMinute.getFirst();
         var highPrice = Collections.max(pricesDuringMinute);
         var lowPrice = Collections.min(pricesDuringMinute);
 
