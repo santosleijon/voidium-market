@@ -1,16 +1,18 @@
 @startuml
 
-title "Event sourcing with projections updated using events sent through Apache Kafka\n(example using "purchase order" entity)"
+title "Event sourcing with projections updated using events sent through Apache Kafka"
 
-component "Purchase Order Repository" as Repository
-database "Event Store" as EventStore
+component "PurchaseOrderService" as Service
+component "PurchaseOrderRepository" as Repository
+database "\n     EventStore    \n" as EventStore #LightBlue
 
-Repository -> EventStore : Write operations
+Service -d-> Repository
+Repository -> EventStore : PurchaseOrderPlaced event
 
-queue "Apache Kafka" as Kafka
-component "Event Publisher" as EventPublisher
-component "Purchase Order Projector" as Projector
-database "Purchase Order Projections" as Projections
+queue "\n    Apache Kafka    \n" as Kafka #DimGrey
+component "EventPublisher" as EventPublisher
+component "PurchaseOrderProjector" as Projector
+database "\n    PurchaseOrderProjections    \n" as Projections #LightBlue
 
 EventPublisher -u-> EventStore
 EventPublisher -d-> Kafka
