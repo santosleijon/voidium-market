@@ -7,6 +7,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
@@ -15,7 +16,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
-@EmbeddedKafka(partitions = 1)
+@EmbeddedKafka(partitions = 1, controlledShutdown = true, kraft = false)
 @DirtiesContext
 class BuyerSimulatorTest {
 
@@ -24,11 +25,14 @@ class BuyerSimulatorTest {
     private final PurchaseOrderService purchaseOrderService;
     private final StateClearer stateClearer;
 
+    private final EmbeddedKafkaBroker embeddedKafkaBroker;
+
     @Autowired
-    public BuyerSimulatorTest(RandomUtil randomUtil, PurchaseOrderService purchaseOrderService, StateClearer stateClearer) {
+    public BuyerSimulatorTest(RandomUtil randomUtil, PurchaseOrderService purchaseOrderService, StateClearer stateClearer, EmbeddedKafkaBroker embeddedKafkaBroker) {
         this.randomUtil = randomUtil;
         this.purchaseOrderService = purchaseOrderService;
         this.stateClearer = stateClearer;
+        this.embeddedKafkaBroker = embeddedKafkaBroker;
     }
 
     @AfterEach

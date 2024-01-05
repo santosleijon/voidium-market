@@ -28,16 +28,7 @@ public class StateClearer {
         eventStore.clear();
         purchaseOrderProjectionsDAO.deleteAll();
         saleOrderProjectionsDAO.deleteAll();
-        waitForEventsToBeConsumed();
 
         log.info("All data was deleted");
-    }
-
-    private void waitForEventsToBeConsumed() {
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

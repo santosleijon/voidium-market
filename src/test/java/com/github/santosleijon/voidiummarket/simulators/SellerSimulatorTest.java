@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
-@EmbeddedKafka(partitions = 1)
+@EmbeddedKafka(partitions = 1, controlledShutdown = true, kraft = false)
 @DirtiesContext
 class SellerSimulatorTest {
 

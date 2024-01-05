@@ -11,6 +11,7 @@ import com.github.santosleijon.voidiummarket.transactions.TransactionService;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.context.EmbeddedKafka;
@@ -24,8 +25,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @TestPropertySource("classpath:test-application.properties")
+@EmbeddedKafka(partitions = 1, controlledShutdown = true, kraft = false)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
-@EmbeddedKafka(partitions = 1)
 class BrokerServiceTest {
 
     private final BrokerConfig brokerConfig;

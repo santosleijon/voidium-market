@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,8 @@ import java.util.UUID;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @TestPropertySource("classpath:test-application.properties")
-@EmbeddedKafka(partitions = 1)
+@EmbeddedKafka(partitions = 1, controlledShutdown = true, kraft = false)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DirtiesContext
 class PurchaseOrderControllerTest {
 
