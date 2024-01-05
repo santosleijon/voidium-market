@@ -34,11 +34,11 @@
         </table>
         <div class="pure-g" style="margin-top: 1rem;">
             <div class="pure-u-10-24">
-                <a class="pure-button" th:href="@{'../?transactionsPage=' + ${previousTransactionsPage}}" th:if="${previousTransactionsPage != null}">Previous page</a>
+                <a class="pure-button" th:href="@{'../admin?transactionsPage=' + ${previousTransactionsPage}}" th:if="${previousTransactionsPage != null}">Previous page</a>
             </div>
             <div class="pure-u-4-24" th:text="@{'Page ' + ${currentTransactionsPage} + ' of ' + ${totalTransactionsPages}}" style="text-align: center;"></div>
             <div class="pure-u-10-24" style="text-align: right;">
-                <a class="pure-button" th:href="@{'../?transactionsPage=' + ${nextTransactionsPage}}" th:if="${nextTransactionsPage != null}">Next page</a>
+                <a class="pure-button" th:href="@{'../admin?transactionsPage=' + ${nextTransactionsPage}}" th:if="${nextTransactionsPage != null}">Next page</a>
             </div>
         </div>
     </div>
@@ -69,11 +69,11 @@
             </table>
             <div class="pure-g" style="margin-top: 1rem;">
                 <div class="pure-u-10-24">
-                    <a class="pure-button" th:href="@{'../?saleOrdersPage=' + ${previousSaleOrdersPage}}" th:if="${previousSaleOrdersPage != null}">Previous page</a>
+                    <a class="pure-button" th:href="@{'../admin?saleOrdersPage=' + ${previousSaleOrdersPage}}" th:if="${previousSaleOrdersPage != null}">Previous page</a>
                 </div>
                 <div class="pure-u-4-24" th:text="@{'Page ' + ${currentSaleOrdersPage} + ' of ' + ${totalSaleOrdersPages}}" style="text-align: center;"></div>
                 <div class="pure-u-10-24" style="text-align: right;">
-                    <a class="pure-button" th:href="@{'../?saleOrdersPage=' + ${nextSaleOrdersPage}}" th:if="${nextSaleOrdersPage != null}">Next page</a>
+                    <a class="pure-button" th:href="@{'../admin?saleOrdersPage=' + ${nextSaleOrdersPage}}" th:if="${nextSaleOrdersPage != null}">Next page</a>
                 </div>
             </div>
         </div>
@@ -103,11 +103,11 @@
             </table>
             <div class="pure-g" style="margin-top: 1rem;">
                 <div class="pure-u-10-24">
-                    <a class="pure-button" th:href="@{'../?purchaseOrdersPage=' + ${previousPurchaseOrdersPage}}" th:if="${previousPurchaseOrdersPage != null}">Previous page</a>
+                    <a class="pure-button" th:href="@{'../admin?purchaseOrdersPage=' + ${previousPurchaseOrdersPage}}" th:if="${previousPurchaseOrdersPage != null}">Previous page</a>
                 </div>
                 <div class="pure-u-4-24" th:text="@{'Page ' + ${currentPurchaseOrdersPage} + ' of ' + ${totalPurchaseOrdersPages}}" style="text-align: center;"></div>
                 <div class="pure-u-10-24" style="text-align: right;">
-                    <a class="pure-button" th:href="@{'../?purchaseOrdersPage=' + ${nextPurchaseOrdersPage}}" th:if="${nextPurchaseOrdersPage != null}">Next page</a>
+                    <a class="pure-button" th:href="@{'../admin?purchaseOrdersPage=' + ${nextPurchaseOrdersPage}}" th:if="${nextPurchaseOrdersPage != null}">Next page</a>
                 </div>
             </div>
         </div>
