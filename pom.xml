@@ -5,20 +5,20 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.1.0</version>
+		<version>3.2.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.santosleijon</groupId>
 	<artifactId>voidium-market</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>voidium-market</name>
-	<description>Backend service for a marketplace where users can buy and sell the fictitious natural resource &quot;voidium&quot;</description>
+	<description>An event sourced and event driven marketplace application for the fictional natural resource "voidium"</description>
 	<properties>
-		<java.version>17</java.version>
-		<jackson-datatype.version>2.14.2</jackson-datatype.version>
-		<spring-kafka.version>3.0.9</spring-kafka.version>
+		<java.version>21</java.version>
+		<jackson-datatype.version>2.16.1</jackson-datatype.version>
+		<spring-kafka.version>3.1.1</spring-kafka.version>
 		<awaitility.version>4.2.0</awaitility.version>
-		<postgresql.version>42.6.0</postgresql.version>
+		<postgresql.version>42.7.1</postgresql.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -89,15 +89,23 @@
 					<mainClass>com.github.santosleijon.voidiummarket.VoidiumMarketApplication</mainClass>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>21</source>
+					<target>21</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<spring.profiles.active>test</spring.profiles.active>
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
         </plugins>
 	</build>
 
